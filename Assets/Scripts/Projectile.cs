@@ -17,24 +17,29 @@ public class Projectile : MonoBehaviour
 
     void Update()
     {
-        // Hareket
         transform.position += (Vector3)(moveDirection * speed * Time.deltaTime);
 
-        // Süre doldu mu?
         lifeTimer -= Time.deltaTime;
         if (lifeTimer <= 0f)
-            Destroy(gameObject); // Jam'de basit destroy, pool sonradan ekleriz
+            Destroy(gameObject);
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Kendimize veya baþka mermiye çarpmasýn
-        if (other.CompareTag("Player") || other.CompareTag("Bullet"))
+        // Kendi mermilerine çarpmasýn
+        if (other.CompareTag("Bullet"))
             return;
 
-        // Düþmana hasar ver (sonra eklenecek)
-        // Enemy enemy = other.GetComponent<Enemy>();
-        // if (enemy != null) enemy.TakeDamage(damage);
+        // Player'a çarpmasýn (mermi Player'ýn içinden çýkýyor olabilir)
+        if (other.CompareTag("Player"))
+            return;
+
+        // Düþmana hasar ver
+        Enemy enemy = other.GetComponent<Enemy>();
+        if (enemy != null)
+        {
+            enemy.TakeDamage(damage);
+        }
 
         Destroy(gameObject);
     }
