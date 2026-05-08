@@ -42,5 +42,9 @@ public class WeaponController : MonoBehaviour
 
         float angle = Mathf.Atan2(shootDirection.y, shootDirection.x) * Mathf.Rad2Deg;
         bullet.transform.rotation = Quaternion.Euler(0, 0, angle);
+
+        // 🎥 MAUS SOL TIK = CINEMACHINE TITREME (6D Shake)
+        if (CinemachineShake.Instance != null)
+            CinemachineShake.Instance.Shake(0.08f, 1.5f);
     }
 }
