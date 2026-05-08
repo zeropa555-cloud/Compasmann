@@ -2,30 +2,62 @@
 
 public class WeaponController : MonoBehaviour
 {
-    [Header("Ateş Ayarları")]
-    [SerializeField] private GameObject bulletPrefab;
+    [Header("Silahlar")]
+    [SerializeField] private GameObject gunObject;
     [SerializeField] private Transform firePoint;
+    [SerializeField] private GameObject bulletPrefab;
+
+    [Header("Gun Ayarları")]
     [SerializeField] private float fireRate = 0.2f;
 
     private float fireTimer;
     private Camera mainCamera;
+    private bool isGunActive = true;
+
+    // 🆕 Dışarıdan okunabilir property (MeleeAttack bunu kontrol edecek)
+    public bool IsGunActive => isGunActive;
 
     void Start()
     {
         mainCamera = Camera.main;
         if (firePoint == null)
             firePoint = transform;
+
+        UpdateWeaponVisibility();
     }
 
     void Update()
     {
-        fireTimer -= Time.deltaTime;
-
-        if (Input.GetMouseButton(0) && fireTimer <= 0f)
+        // 🔫 1 tuşu = Gun modu
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            Shoot();
-            fireTimer = fireRate;
+            isGunActive = true;
+            UpdateWeaponVisibility();
         }
+
+        // ⚔️ 2 tuşu = Melee modu
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            isGunActive = false;
+            UpdateWeaponVisibility();
+        }
+
+        // 🔫 Sol tık (LMB) = Sadece Gun modunda ateş eder
+        if (isGunActive)
+        {
+            fireTimer -= Time.deltaTime;
+            if (Input.GetMouseButton(0) && fireTimer <= 0f)
+            {
+                Shoot();
+                fireTimer = fireRate;
+            }
+        }
+    }
+
+    void UpdateWeaponVisibility()
+    {
+        if (gunObject != null)
+            gunObject.SetActive(isGunActive);
     }
 
     void Shoot()
@@ -43,7 +75,6 @@ public class WeaponController : MonoBehaviour
         float angle = Mathf.Atan2(shootDirection.y, shootDirection.x) * Mathf.Rad2Deg;
         bullet.transform.rotation = Quaternion.Euler(0, 0, angle);
 
-        // 🎥 MAUS SOL TIK = CINEMACHINE TITREME (6D Shake)
         if (CinemachineShake.Instance != null)
             CinemachineShake.Instance.Shake(0.08f, 1.5f);
     }
