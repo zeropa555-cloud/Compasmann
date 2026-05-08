@@ -1036,6 +1036,7 @@ GameObject:
   - component: {fileID: 1583656470}
   - component: {fileID: 1583656472}
   - component: {fileID: 1583656473}
+  - component: {fileID: 1583656474}
   m_Layer: 0
   m_Name: CM PlayerCam
   m_TagString: Untagged
@@ -1134,9 +1135,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineBasicMultiChannelPerlin
   NoiseProfile: {fileID: 11400000, guid: 69ce8388f6785dd4c8c39915efece2f4, type: 2}
   PivotOffset: {x: 0, y: 0, z: 0}
-  AmplitudeGain: 1
-  FrequencyGain: 1
+  AmplitudeGain: 0
+  FrequencyGain: 0
   m_NoiseOffsets: {x: 0, y: 0, z: 0}
+--- !u!114 &1583656474
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583656469}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 205736ad8e4e5ff4bb1a898f321810d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CinemachineShake
 --- !u!1 &1986973084
 GameObject:
   m_ObjectHideFlags: 0
