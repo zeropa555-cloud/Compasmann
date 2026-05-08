@@ -17,7 +17,7 @@ public class Enemy : MonoBehaviour
     {
         currentHealth = maxHealth;
 
-        // Player'� bul
+        // Player'� bul
         GameObject playerObj = GameObject.FindWithTag("Player");
         if (playerObj != null)
             player = playerObj.transform;
@@ -31,7 +31,7 @@ public class Enemy : MonoBehaviour
 
         float distance = Vector2.Distance(transform.position, player.position);
 
-        // Yak�nsa vur
+        // Yak�nsa vur
         if (distance <= attackRange && attackTimer <= 0f)
         {
             AttackPlayer();
@@ -71,6 +71,15 @@ public class Enemy : MonoBehaviour
     void Die()
     {
         isDead = true;
-        Destroy(gameObject);
+
+        // Eski FindObjectOfType yerine yeni ve hızlı olan FindFirstObjectByType kullanıyoruz
+        RoomManager room = Object.FindFirstObjectByType<RoomManager>();
+        
+        if (room != null)
+        {
+            room.EnemyDied();
+        }
+
+        Destroy(gameObject); // Düşmanı yok et
     }
 }
