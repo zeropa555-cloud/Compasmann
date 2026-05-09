@@ -4,8 +4,11 @@ public class RangedEnemy : MonoBehaviour
 {
     [Header("Stats")]
     [SerializeField] private int maxHealth = 40;
-    [SerializeField] private float healthRegenRate = 3f;
-    [SerializeField] private float regenDelay = 2f;
+
+    [Header("❤️ GÖRÜŞ DIŞI CAN YENİLEME")]
+    [SerializeField] private float healthRegenRate = 5f;     // Saniyede 5 can
+    [SerializeField] private float regenDelay = 2f;          // Hasar alınca 2 sn bekle
+    [SerializeField] private bool showRegenLog = true;       // Console'da göster
 
     [Header("Ateş")]
     [SerializeField] private GameObject bulletPrefab;
@@ -13,21 +16,22 @@ public class RangedEnemy : MonoBehaviour
     [SerializeField] private float fireRate = 1.5f;
     [SerializeField] private float attackRange = 7f;
 
-    [Header("Cover / Kaçma")]
+    [Header("Kaçma")]
     [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private float lowHealthThreshold = 0.5f;  // %50 = Kaç
-    [SerializeField] private float fleeRange = 2.5f;           // Player bu kadar yaklaşırsa başka cover'a git
+    [SerializeField] private float lowHealthThreshold = 0.5f;
+    [SerializeField] private float fleeDistance = 8f;
+    [SerializeField] private float zigzagInterval = 0.4f;
 
     private int currentHealth;
     private float fireTimer;
     private float lastDamageTime;
-    private float coverSearchTimer;    // Cover'a ulaşamazsa flee yap
     private Transform player;
     private Rigidbody2D rb;
+    private FieldOfView fov;
 
-    private bool isHiding = false;
-    private Transform currentCover = null;
-    private bool isStuck = false;      // Duvara takıldı mı?
+    private bool isFleeing = false;
+    private float zigzagTimer = 0f;
+    private int zigzagSide = 1;
 
     void Start()
     {
@@ -41,7 +45,7 @@ public class RangedEnemy : MonoBehaviour
         if (firePoint == null) firePoint = transform;
 
         lastDamageTime = -999f;
-        coverSearchTimer = 0f;
+        fov = GetComponent<FieldOfView>();
     }
 
     void Update()
@@ -51,48 +55,43 @@ public class RangedEnemy : MonoBehaviour
 
         float healthPercent = (float)currentHealth / maxHealth;
 
-        // 🏥 Can yenileme (Saklanıyorsa)
-        if (isHiding && Time.time > lastDamageTime + regenDelay && currentHealth < maxHealth)
+        // 🚫👁️ GÖRÜŞ DIŞINDAYSA CAN YENİLE! (Senin onu göremediğin/göremediği yerde)
+        bool isHidden = (fov == null) || !fov.CanSeeTarget;  // Player'ı göremiyorsa = Gizli
+        bool canRegen = Time.time > lastDamageTime + regenDelay && currentHealth < maxHealth;
+
+        if (canRegen && isHidden)
         {
+            int prevHealth = currentHealth;
             currentHealth += Mathf.RoundToInt(healthRegenRate * Time.deltaTime);
             currentHealth = Mathf.Min(currentHealth, maxHealth);
-        }
 
-        // 🧠 AI Kararları
-        if (healthPercent <= lowHealthThreshold && !isHiding)
-        {
-            FindNearestCover();
-            coverSearchTimer = 0f;
-        }
-
-        // Player cover'a çok yaklaştı mı? Başka cover'a kaç!
-        if (isHiding && currentCover != null)
-        {
-            float distToCover = Vector2.Distance(player.position, currentCover.position);
-            if (distToCover < fleeRange)
+            if (showRegenLog && currentHealth > prevHealth)
             {
-                FindDifferentCover();
-                coverSearchTimer = 0f;
+                Debug.Log("❤️ GÖRÜŞ DIŞINDA! Enemy can yenileniyor: " + prevHealth + " → " + currentHealth);
             }
         }
 
-        // Can dolduysa dön
-        if (isHiding && healthPercent >= 0.8f)
+        // Can azaldı mı? KAÇ!
+        if (healthPercent <= lowHealthThreshold && !isFleeing)
         {
-            isHiding = false;
-            currentCover = null;
-            isStuck = false;
-            rb.linearVelocity = Vector2.zero;
+            if (fov == null || fov.CanSeeTarget)
+            {
+                isFleeing = true;
+                zigzagTimer = 0f;
+                zigzagSide = Random.value > 0.5f ? 1 : -1;
+                Debug.Log("🏃 Enemy kaçıyor! Can: " + currentHealth);
+            }
         }
 
-        // ⏰ 3 saniyedir cover'a ulaşamadıysa FLEE yap (takılmıştır)
-        if (isHiding && !isStuck)
+        // Yeterince uzaklaştı mı ve can doldu mu? Dön
+        if (isFleeing)
         {
-            coverSearchTimer += Time.deltaTime;
-            if (coverSearchTimer > 3f)
+            float dist = Vector2.Distance(transform.position, player.position);
+            if (dist >= fleeDistance && healthPercent >= 0.8f)
             {
-                isStuck = true;
-                currentCover = null; // Cover'ı unut, sadece kaç
+                isFleeing = false;
+                rb.linearVelocity = Vector2.zero;
+                Debug.Log("✅ Enemy savaşa dönüyor! Can: " + currentHealth);
             }
         }
 
@@ -103,34 +102,33 @@ public class RangedEnemy : MonoBehaviour
     {
         if (player == null || rb == null) return;
 
-        // 🏃 FLEE MODU (Takıldıysa sadece Player'dan uzaklaş)
-        if (isHiding && isStuck)
+        // KAÇMA MODU (Zigzag)
+        if (isFleeing)
         {
             Vector2 fleeDir = ((Vector2)transform.position - (Vector2)player.position).normalized;
-            rb.linearVelocity = fleeDir * moveSpeed;
+
+            zigzagTimer += Time.fixedDeltaTime;
+            if (zigzagTimer >= zigzagInterval)
+            {
+                zigzagTimer = 0f;
+                zigzagSide *= -1;
+            }
+
+            float zigzagAngle = zigzagSide * 45f;
+            Vector2 zigzagDir = RotateVector(fleeDir, zigzagAngle);
+
+            rb.linearVelocity = zigzagDir * moveSpeed;
             return;
         }
 
-        // 🏃 COVER'A GİT
-        if (isHiding && currentCover != null)
+        // 🚫 GÖREMİYORSA IDLE (Dur)
+        if (fov != null && !fov.CanSeeTarget)
         {
-            Vector2 dir = ((Vector2)currentCover.position - (Vector2)transform.position).normalized;
-            float dist = Vector2.Distance(transform.position, currentCover.position);
-
-            if (dist > 0.3f)
-            {
-                rb.linearVelocity = dir * moveSpeed;
-            }
-            else
-            {
-                // Vardı!
-                rb.linearVelocity = Vector2.zero;
-                coverSearchTimer = 0f;
-            }
+            rb.linearVelocity = Vector2.zero;
             return;
         }
 
-        // 🔫 NORMAL SAVAŞ
+        // 🔫 NORMAL SAVAŞ (Görebiliyorsa)
         float distance = Vector2.Distance(transform.position, player.position);
 
         if (distance <= attackRange && fireTimer <= 0f)
@@ -155,89 +153,12 @@ public class RangedEnemy : MonoBehaviour
         }
     }
 
-    // 🧱 DUVARA ÇARPIRSA YÖN DEĞİŞTİR (Sağa/Sola kay)
-    void OnCollisionEnter2D(Collision2D col)
+    Vector2 RotateVector(Vector2 v, float degrees)
     {
-        if (!col.gameObject.CompareTag("Wall")) return;
-
-        if (isHiding && currentCover != null && !isStuck)
-        {
-            // Duvara çarpınca 90° sağa veya sola dön
-            Vector2 toCover = ((Vector2)currentCover.position - (Vector2)transform.position).normalized;
-            Vector2 avoidDir = Vector2.Perpendicular(toCover);
-
-            // Hangi yön daha iyi? (Cover'a daha yakın olanı seç)
-            Vector2 pos = transform.position;
-            float distRight = Vector2.Distance(pos + avoidDir, currentCover.position);
-            float distLeft = Vector2.Distance(pos - avoidDir, currentCover.position);
-
-            if (distRight < distLeft)
-                rb.linearVelocity = avoidDir * moveSpeed;
-            else
-                rb.linearVelocity = -avoidDir * moveSpeed;
-
-            // 0.4 saniye sonra tekrar cover'a yönel
-            Invoke(nameof(RealignToCover), 0.4f);
-        }
-    }
-
-    void RealignToCover()
-    {
-        if (currentCover != null && !isStuck)
-        {
-            Vector2 dir = ((Vector2)currentCover.position - (Vector2)transform.position).normalized;
-            rb.linearVelocity = dir * moveSpeed;
-        }
-    }
-
-    void FindNearestCover()
-    {
-        GameObject[] covers = GameObject.FindGameObjectsWithTag("Cover");
-        if (covers.Length == 0)
-        {
-            isStuck = true; // Cover yoksa direk flee
-            return;
-        }
-
-        Transform best = covers[0].transform;
-        float bestDist = Vector2.Distance(transform.position, best.position);
-
-        foreach (var c in covers)
-        {
-            float d = Vector2.Distance(transform.position, c.transform.position);
-            if (d < bestDist) { bestDist = d; best = c.transform; }
-        }
-
-        currentCover = best;
-        isHiding = true;
-        isStuck = false;
-    }
-
-    void FindDifferentCover()
-    {
-        GameObject[] covers = GameObject.FindGameObjectsWithTag("Cover");
-        if (covers.Length <= 1) { isStuck = true; return; }
-
-        Transform best = null;
-        float bestDist = 0f;
-
-        foreach (var c in covers)
-        {
-            if (c.transform == currentCover) continue;
-
-            float d = Vector2.Distance(player.position, c.transform.position);
-            if (d > bestDist) { bestDist = d; best = c.transform; }
-        }
-
-        if (best != null)
-        {
-            currentCover = best;
-            coverSearchTimer = 0f;
-        }
-        else
-        {
-            isStuck = true;
-        }
+        float rad = degrees * Mathf.Deg2Rad;
+        float sin = Mathf.Sin(rad);
+        float cos = Mathf.Cos(rad);
+        return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
     }
 
     void Shoot()
@@ -257,13 +178,22 @@ public class RangedEnemy : MonoBehaviour
 
     public void TakeDamage(int dmg)
     {
+        int prevHealth = currentHealth;
         currentHealth -= dmg;
         lastDamageTime = Time.time;
+
+        Debug.Log("🩸 Enemy hasar aldı! " + prevHealth + " → " + currentHealth);
+
         StartCoroutine(HitFlash());
 
-        if ((float)currentHealth / maxHealth <= lowHealthThreshold && !isHiding)
+        if ((float)currentHealth / maxHealth <= lowHealthThreshold && !isFleeing)
         {
-            FindNearestCover();
+            if (fov == null || fov.CanSeeTarget)
+            {
+                isFleeing = true;
+                zigzagTimer = 0f;
+                zigzagSide = Random.value > 0.5f ? 1 : -1;
+            }
         }
 
         if (currentHealth <= 0)
