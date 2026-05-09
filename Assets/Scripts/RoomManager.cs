@@ -3,68 +3,92 @@ using System.Collections.Generic;
 
 public class RoomManager : MonoBehaviour
 {
-    [Header("Kapı")]
-    public GameObject doorObject;           // Kapı objesi
-    public Animator doorAnimator;           // 🆕 Kapının Animator'u
-    public string openTrigger = "Open";     // 🆕 Açılma trigger adı
-    public string closeTrigger = "Close";   // 🆕 Kapanma trigger adı
-    public Collider2D doorCollider;         // Kapı collider (geçişi engelleyen)
+    [Header("Oda Alanı")]
+    public Vector2 roomSize = new Vector2(12, 8);
+    public Color roomGizmoColor = new Color(0, 1, 1, 0.3f);
+
+    [Header("Duvar Sınırları")]
+    public Vector2 wallOffset = new Vector2(0.5f, 0.5f);
+
+    [Header("Kapılar")]
+    public List<DoorInfo> doors = new List<DoorInfo>();
 
     [Header("Spawn Noktaları")]
-    public List<SpawnPoint> spawnPoints;
+    public List<SpawnPoint> spawnPoints = new List<SpawnPoint>();
 
-    [Header("Oda Ayarları")]
-    public bool autoStartOnEnter = true;
-    public bool roomCleared = false;
+    [Header("Zaman Ayarları")]
+    public float doorCloseDelay = 1f;
+    public float checkInterval = 0.5f;
 
     private bool playerInside = false;
-    private bool waveStarted = false;
+    private bool battleActive = false;
+    private bool roomCleared = false;
+    private int totalSpawned = 0;
 
     void Start()
     {
-        // Başlangıçta kapı açık (animasyonlu)
-        OpenDoor();
+        foreach (var d in doors)
+            OpenDoor(d);
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player") && !playerInside && !roomCleared)
-        {
-            playerInside = true;
-            if (autoStartOnEnter && !waveStarted)
-                StartRoom();
-        }
+        if (!other.CompareTag("Player")) return;
+        if (playerInside || battleActive || roomCleared) return;
+
+        playerInside = true;
+        StartCoroutine(StartBattleDelayed());
     }
 
-    public void StartRoom()
+    System.Collections.IEnumerator StartBattleDelayed()
     {
-        if (waveStarted) return;
-        waveStarted = true;
+        Debug.Log("⏳ " + doorCloseDelay + " saniye sonra kapılar kapanacak...");
+        yield return new WaitForSeconds(doorCloseDelay);
 
-        Debug.Log("🚪 ODA KAPANIYOR!");
+        if (roomCleared) yield break;
 
-        CloseDoor();
+        Debug.Log("🚪 KAPILAR KAPANDI!");
+        battleActive = true;
+
+        foreach (var d in doors)
+            CloseDoor(d);
+
         StartSpawns();
         StartCoroutine(CheckEnemiesRoutine());
     }
 
     void StartSpawns()
     {
+        totalSpawned = 0;
         foreach (var sp in spawnPoints)
         {
-            if (sp != null) sp.enabled = true; // Spawn'ları aktif et
+            if (sp != null)
+            {
+                sp.enabled = true;
+                totalSpawned += sp.maxSpawnCount;  // 🆕 maxSpawnCount kullan
+            }
         }
+        Debug.Log("👾 Toplam " + totalSpawned + " düşman spawn edilecek");
     }
 
     System.Collections.IEnumerator CheckEnemiesRoutine()
     {
-        while (!roomCleared)
+        while (battleActive && !roomCleared)
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(checkInterval);
 
             GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
-            if (enemies.Length <= 0 && waveStarted)
+            int aliveInRoom = 0;
+            foreach (var e in enemies)
+            {
+                if (e == null) continue;
+                float dist = Vector2.Distance(e.transform.position, transform.position);
+                if (dist < roomSize.magnitude * 0.7f)
+                    aliveInRoom++;
+            }
+
+            if (aliveInRoom <= 0 && totalSpawned > 0)
             {
                 RoomCleared();
             }
@@ -74,39 +98,58 @@ public class RoomManager : MonoBehaviour
     void RoomCleared()
     {
         roomCleared = true;
-        Debug.Log("✅ ODA TEMİZLENDİ! Kapı açılıyor...");
-        OpenDoor();
+        battleActive = false;
+        Debug.Log("✅ TÜM DÜŞMANLAR ÖLDÜ! Kapılar açılıyor...");
+
+        foreach (var d in doors)
+            OpenDoor(d);
     }
 
-    void CloseDoor()
+    void CloseDoor(DoorInfo d)
     {
-        // 🎬 KAPANMA ANİMASYONU
-        if (doorAnimator != null)
-            doorAnimator.SetTrigger(closeTrigger);
-        else
-            Debug.LogWarning("Kapı Animator yok!");
+        if (d.animator != null)
+            d.animator.SetTrigger(d.closeTrigger);
 
-        // Collider'ı hemen aktif et (geçişi engelle)
-        if (doorCollider != null)
-            doorCollider.enabled = true;
+        if (d.col != null)
+            d.col.enabled = true;
     }
 
-    void OpenDoor()
+    void OpenDoor(DoorInfo d)
     {
-        // 🎬 AÇILMA ANİMASYONU
-        if (doorAnimator != null)
-            doorAnimator.SetTrigger(openTrigger);
-        else
-            Debug.LogWarning("Kapı Animator yok!");
+        if (d.animator != null)
+            d.animator.SetTrigger(d.openTrigger);
 
-        // Collider'ı kapat (geçiş serbest)
-        if (doorCollider != null)
-            doorCollider.enabled = false;
+        if (d.col != null)
+            d.col.enabled = false;
     }
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireCube(transform.position, new Vector3(10, 10, 0));
+        Gizmos.color = roomGizmoColor;
+        Gizmos.DrawWireCube(transform.position, new Vector3(roomSize.x, roomSize.y, 0));
+
+        Gizmos.color = Color.red;
+        Vector3 wallSize = new Vector3(roomSize.x - wallOffset.x * 2, roomSize.y - wallOffset.y * 2, 0);
+        Gizmos.DrawWireCube(transform.position, wallSize);
+
+        foreach (var d in doors)
+        {
+            if (d.doorObj != null)
+            {
+                Gizmos.color = roomCleared ? Color.green : Color.yellow;
+                Gizmos.DrawLine(transform.position, d.doorObj.transform.position);
+            }
+        }
     }
+}
+
+[System.Serializable]
+public class DoorInfo
+{
+    public string name = "Kapı";
+    public GameObject doorObj;
+    public Animator animator;
+    public string openTrigger = "Open";
+    public string closeTrigger = "Close";
+    public Collider2D col;
 }

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
 {
@@ -7,18 +7,29 @@ public class EnemyHealth : MonoBehaviour
     private SpriteRenderer sr;
     private Color originalColor;
 
+    [Header("Animasyon")]
+    public Animator anim;                    // 🆕 Düşmanın Animator'u
+    public string hitTrigger = "Hit";        // 🆕 Trigger adı
+
     void Awake()
     {
         currentHealth = maxHealth;
         sr = GetComponent<SpriteRenderer>();
         if (sr != null) originalColor = sr.color;
+
+        // 🆕 Animator'ı bul
+        if (anim == null) anim = GetComponent<Animator>();
     }
 
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
 
-        // Hasar aninda BEYAZ FLASH (0.1sn)
+        // 🎬 HASAR ALINCA HIT ANİMASYONU OYNAT
+        if (anim != null)
+            anim.SetTrigger(hitTrigger);
+
+        // Kısa beyaz flash (animasyonun yanında)
         if (sr != null)
         {
             sr.color = Color.white;
@@ -31,7 +42,6 @@ public class EnemyHealth : MonoBehaviour
 
     void ResetColor()
     {
-        // Kendi orijinal rengine don (beyaz degil!)
         if (sr != null) sr.color = originalColor;
     }
 

@@ -22,7 +22,15 @@ public class EnemyAI : MonoBehaviour
     public Transform weaponVisual;
     public Vector3 weaponRightPos = new Vector3(0.4f, 0, 0);
     public Vector3 weaponLeftPos = new Vector3(-0.4f, 0, 0);
+    public float weaponRotation = -90f;
 
+    [Header("Oda Sınırları (Duvarlar)")]
+    public bool useBounds = false;
+    public Vector2 minBounds;
+    public Vector2 maxBounds;
+
+    // 🎬 SADECE AWAKE'DE ANIMATOR BAŞLAT, SONRA DOKUNMA!
+    private Animator anim;
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private bool facingRight = true;
@@ -34,6 +42,13 @@ public class EnemyAI : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
+
+        // 🎬 Animator'ı bul ve Walk'ı başlat (doğduğu anda koşsun)
+        anim = GetComponent<Animator>();
+        if (anim != null)
+        {
+            anim.Play("Walk"); // 🆕 Doğar doğmaz koşmaya başlar
+        }
 
         if (player == null)
         {
@@ -73,7 +88,7 @@ public class EnemyAI : MonoBehaviour
 
         if (distance <= attackRange)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.linearVelocity = Vector2.zero; // Durur ama animasyon devam eder!
 
             if (Time.time >= lastAttackTime + attackCooldown)
             {
@@ -86,30 +101,29 @@ public class EnemyAI : MonoBehaviour
             Vector2 dir = (player.position - transform.position).normalized;
             rb.linearVelocity = dir * moveSpeed;
         }
+
+        // DUVAR SINIRLARI
+        if (useBounds)
+        {
+            Vector2 pos = rb.position;
+            pos.x = Mathf.Clamp(pos.x, minBounds.x, maxBounds.x);
+            pos.y = Mathf.Clamp(pos.y, minBounds.y, maxBounds.y);
+            rb.position = pos;
+        }
+
+        // 🎬 HİÇBİR ANIMATOR KONTROLÜ YOK! (Sadece tek state, sürekli loop)
     }
 
     IEnumerator PerformAttack()
     {
         if (swordWavePrefab != null && swordSpawnPoint != null)
         {
-            // 🔍 Debug: Nerede spawn edeceğini görelim
-            Debug.Log("Spawn pozisyon: " + swordSpawnPoint.position);
-
-            // 🎬 Prefab'ı SWORDSPAWN pozisyonunda ve rotasyonunda oluştur
             GameObject wave = Instantiate(
                 swordWavePrefab,
                 swordSpawnPoint.position,
                 swordSpawnPoint.rotation
             );
 
-            // 🆕 POZİSYONU EXPLICIT OLARAK AYARLA (garanti olsun)
-            wave.transform.position = swordSpawnPoint.position;
-            wave.transform.rotation = swordSpawnPoint.rotation;
-
-            // 🆕 PARENT YAP - World pozisyonunu KORU (true = korur)
-            wave.transform.SetParent(swordSpawnPoint, true);
-
-            // 🔄 Sola bakıyorsa ters çevir
             if (!facingRight)
             {
                 Vector3 scale = wave.transform.localScale;
@@ -117,20 +131,12 @@ public class EnemyAI : MonoBehaviour
                 wave.transform.localScale = scale;
             }
 
-            // 🆕 Eğer hâlâ görünmüyorsa, SpriteRenderer'ı kontrol et
-            SpriteRenderer waveSr = wave.GetComponent<SpriteRenderer>();
-            if (waveSr != null)
-            {
-                Debug.Log("Wave sprite: " + waveSr.sprite);
-                waveSr.sortingOrder = 10; // Öne çıksın
-            }
-
+            wave.transform.SetParent(swordSpawnPoint);
             Destroy(wave, waveDuration);
         }
 
         yield return new WaitForSeconds(0.2f);
 
-        // Hasar verme kısmı aynı...
         Vector2 attackDir = facingRight ? Vector2.right : Vector2.left;
         Vector2 attackCenter = (Vector2)transform.position + attackDir * 0.5f;
 
@@ -153,5 +159,13 @@ public class EnemyAI : MonoBehaviour
         float dir = facingRight ? 1f : -1f;
         Gizmos.color = Color.green;
         Gizmos.DrawRay(transform.position, new Vector3(dir * attackRange, 0, 0));
+
+        if (useBounds)
+        {
+            Gizmos.color = Color.blue;
+            Vector2 center = (minBounds + maxBounds) / 2f;
+            Vector2 size = maxBounds - minBounds;
+            Gizmos.DrawWireCube(new Vector3(center.x, center.y, 0), new Vector3(size.x, size.y, 0));
+        }
     }
 }

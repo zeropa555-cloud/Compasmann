@@ -25,7 +25,10 @@ public class Bullet : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
 
         if (rb != null)
+        {
+            rb.gravityScale = 0f;
             rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        }
 
         Destroy(gameObject, lifeTime);
 
@@ -39,66 +42,54 @@ public class Bullet : MonoBehaviour
             rb.linearVelocity = dir * speed;
     }
 
-    // 🆕 FİZİKSEL ÇARPIŞMA
+    // 🆕 SADECE FİZİKSEL ÇARPIŞMA
     void OnCollisionEnter2D(Collision2D collision)
     {
         GameObject target = collision.gameObject;
 
-        // 🔍 Debug log
-        Debug.Log("🔴 Çarptı: " + target.name + " | Tag: " + target.tag);
+        Debug.Log("💥 Çarptı: " + target.name + " | Tag: " + target.tag);
 
-        // 🆕 EĞER KILIÇSA (veya child obje), PARENT'INA BAK!
+        // 🎯 ROOM'A ÇARPIINCA: HİÇBİR ŞEY YAPMA! (Geç, yok olma!)
+        if (target.CompareTag("Room"))
+        {
+            Debug.Log("ℹ️ Room - geçiyor");
+            return; // Sadece return, yok olma!
+        }
+
+        // 🆕 ZEMİN/DUVAR çarpınca yok ol
+        if (target.CompareTag("Wall") || target.CompareTag("Ground"))
+        {
+            isAlive = false;
+            Destroy(gameObject);
+            return;
+        }
+
+        // 🆕 DÜŞMANIN CHILD OBJESİ (kılıç) ise parent'a bak
         if (!target.CompareTag("Enemy") && target.transform.parent != null)
         {
             target = target.transform.parent.gameObject;
-            Debug.Log("🔄 Parent'a yönlendirildi: " + target.name + " | Parent Tag: " + target.tag);
+            Debug.Log("🔄 Parent: " + target.name);
         }
 
-        HasarVer(target);
-    }
-
-    // 🆕 TRIGGER ÇARPIŞMA (yedek)
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        GameObject target = other.gameObject;
-
-        // 🆕 EĞER KILIÇSA, PARENT'INA BAK!
-        if (!target.CompareTag("Enemy") && target.transform.parent != null)
-        {
-            target = target.transform.parent.gameObject;
-        }
-
-        HasarVer(target);
-    }
-
-    // 🆕 ORTAK HASAR VERME
-    void HasarVer(GameObject target)
-    {
-        // Kendine veya Player'a çarpma
-        if (target.CompareTag("Bullet") || target.CompareTag("Player")) return;
-
-        // Düşmana çarpınca hasar ver
+        // 🆕 DÜŞMANA ÇARPIINCA: Hasar ver ve yok ol
         if (target.CompareTag("Enemy"))
         {
             EnemyHealth health = target.GetComponent<EnemyHealth>();
             if (health != null)
             {
                 health.TakeDamage(damage);
-                Debug.Log("✅ Hasar verildi: " + damage + " | Hedef: " + target.name);
+                Debug.Log("✅ Hasar: " + damage);
             }
-            else
-            {
-                Debug.LogError("❌ " + target.name + " üzerinde EnemyHealth YOK!");
-            }
+
+            isAlive = false;
+            Destroy(gameObject);
         }
         else
         {
-            Debug.Log("ℹ️ Düşman değil, yok oluyor: " + target.name);
+            // Başka her şeye çarpınca yok ol (isteğe bağlı)
+            isAlive = false;
+            Destroy(gameObject);
         }
-
-        // Yok ol
-        isAlive = false;
-        Destroy(gameObject);
     }
 
     void OnDestroy()
