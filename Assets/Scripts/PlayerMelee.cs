@@ -1,49 +1,19 @@
-ï»¿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class PlayerMelee : MonoBehaviour
 {
-    [Header("Melee Alan HasarÄ±")]
+    [Header("Melee Alan Hasarý")]
     public float attackRange = 1.8f;
     public float attackDamage = 30f;
     public float attackCooldown = 0.4f;
     public LayerMask enemyLayer;
 
-    [Header("YÃ¶n & Pozisyon")]
-    public float forwardOffset = 0.5f;
-    public Vector3 rightPos = new Vector3(0.4f, 0, 0);
-    public Vector3 leftPos = new Vector3(-0.4f, 0, 0);
-
     private bool canAttack = true;
-    private PlayerMovement playerMovement;
-    private SpriteRenderer sr;
-
-    void Awake()
-    {
-        playerMovement = GetComponentInParent<PlayerMovement>();
-        sr = GetComponent<SpriteRenderer>();
-    }
 
     void Update()
     {
-        if (playerMovement == null) return;
-
-        // SAÄžA BAKIYOR (D) â†’ Z = -90
-        if (playerMovement.facingRight)
-        {
-            transform.localPosition = rightPos;
-            transform.localRotation = Quaternion.Euler(0, 0, -90f);
-            if (sr != null) sr.flipX = false;
-        }
-        // SOLA BAKIYOR (A) â†’ Z = +90
-        else
-        {
-            transform.localPosition = leftPos;
-            transform.localRotation = Quaternion.Euler(0, 0, 90f);
-            if (sr != null) sr.flipX = true;
-        }
-
-        // SOL CLICK = Hasar
+        // SOL CLICK = Etrafýna hasar (sadece bu item aktifken çalýþýr)
         if (Input.GetMouseButtonDown(0) && canAttack)
         {
             StartCoroutine(PerformMelee());
@@ -54,17 +24,8 @@ public class PlayerMelee : MonoBehaviour
     {
         canAttack = false;
 
-        Vector2 offset = Vector2.zero;
-        if (playerMovement != null)
-        {
-            offset = playerMovement.facingRight
-                ? Vector2.right * forwardOffset
-                : Vector2.left * forwardOffset;
-        }
-
-        Vector2 attackCenter = (Vector2)transform.position + offset;
-
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackCenter, attackRange, enemyLayer);
+        // Etrafýndaki düþmanlara hasar
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayer);
 
         foreach (Collider2D enemy in hitEnemies)
         {
@@ -74,7 +35,7 @@ public class PlayerMelee : MonoBehaviour
         }
 
         if (hitEnemies.Length > 0)
-            Debug.Log("Melee vurdu: " + hitEnemies.Length + " dÃ¼ÅŸman");
+            Debug.Log("Item vurdu: " + hitEnemies.Length + " düþman");
 
         yield return new WaitForSeconds(attackCooldown);
         canAttack = true;
@@ -82,12 +43,7 @@ public class PlayerMelee : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        float offset = forwardOffset;
-        if (playerMovement != null && !playerMovement.facingRight)
-            offset = -offset;
-
-        Vector3 center = transform.position + Vector3.right * offset;
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(center, attackRange);
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
