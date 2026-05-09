@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 584bddc6eff90da4e9d174bf9832853c
+guid: cc1766c550fa13e439356550ec4c9e47
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3873014822824386845
-    second: KAPI 4_0
+      213: -1690043374647211422
+    second: "can bar\u0131 \xE7er\xE7evesi mavi_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: KAPI 4_0
+      name: "can bar\u0131 \xE7er\xE7evesi mavi_0"
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 96
-        height: 192
+        width: 258
+        height: 57
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d1125441676bfb530800000000000000
-      internalID: 3873014822824386845
+      spriteID: 26a86274182cb88e0800000000000000
+      internalID: -1690043374647211422
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 470816ee05434a84aa551f1f1279683b
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      KAPI 4_0: 3873014822824386845
+      "can bar\u0131 \xE7er\xE7evesi mavi_0": -1690043374647211422
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

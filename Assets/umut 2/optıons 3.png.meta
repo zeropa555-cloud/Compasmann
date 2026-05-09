@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 584bddc6eff90da4e9d174bf9832853c
+guid: bfcd8ff5d480dc542a3e3f8f5533f1ec
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3873014822824386845
-    second: KAPI 4_0
+      213: -7274197210500015804
+    second: "opt\u0131ons 3_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: KAPI 4_0
+      name: "opt\u0131ons 3_0"
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 96
-        height: 192
+        width: 155
+        height: 80
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d1125441676bfb530800000000000000
-      internalID: 3873014822824386845
+      spriteID: 449520a6d2cdc0b90800000000000000
+      internalID: -7274197210500015804
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 470816ee05434a84aa551f1f1279683b
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      KAPI 4_0: 3873014822824386845
+      "opt\u0131ons 3_0": -7274197210500015804
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

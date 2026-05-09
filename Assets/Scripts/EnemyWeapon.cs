@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyWeapon : MonoBehaviour
 {
@@ -8,6 +8,9 @@ public class EnemyWeapon : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        // 🔍 DEBUG: Neye değdiğini gör
+        Debug.Log("Kılıç değdi: " + other.name + " | Tag: " + other.tag);
+
         if (other.CompareTag("Player"))
         {
             if (Time.time >= lastDamageTime + damageCooldown)
@@ -17,6 +20,11 @@ public class EnemyWeapon : MonoBehaviour
                 {
                     health.TakeDamage(damage);
                     lastDamageTime = Time.time;
+                    Debug.Log("✅ Player'a hasar verildi: " + damage);
+                }
+                else
+                {
+                    Debug.LogError("❌ Player'da PlayerHealth YOK!");
                 }
             }
         }
