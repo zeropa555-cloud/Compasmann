@@ -3,14 +3,18 @@ using System.Collections;
 
 public class PlayerMelee : MonoBehaviour
 {
-    [Header("Tıklama Vuruşu")]
+    [Header("Saldiri Alani (Hasar Veren)")]
     public float attackRange = 1.8f;
     public float attackDamage = 30f;
-    public float attackCooldown = 0.4f;
+    public float attackCooldown = 0.6f;
     public LayerMask enemyLayer;
 
+    [Header("Miknatis Dalga (Sadece Animasyon)")]
+    public GameObject wavePrefab;
+    public Transform waveSpawnPoint;
+    public float waveDuration = 0.4f;
+
     [Header("Yön & Pozisyon")]
-    public float forwardOffset = 0.5f;
     public Vector3 rightPos = new Vector3(0.4f, 0, 0);
     public Vector3 leftPos = new Vector3(-0.4f, 0, 0);
 
@@ -43,27 +47,43 @@ public class PlayerMelee : MonoBehaviour
             if (sr != null) sr.flipX = true;
         }
 
-        // SOL CLICK = Hasar
+        // SOL CLICK = Saldiri
         if (Input.GetMouseButtonDown(0) && canAttack)
         {
-            StartCoroutine(PerformMelee());
+            StartCoroutine(PerformAttack());
         }
     }
 
-    IEnumerator PerformMelee()
+    IEnumerator PerformAttack()
     {
         canAttack = false;
 
-        Vector2 offset = Vector2.zero;
-        if (playerMovement != null)
+        // 🎬 1. MIKNATIS DALGASI SPAWN
+        if (wavePrefab != null && waveSpawnPoint != null)
         {
-            offset = playerMovement.facingRight
-                ? Vector2.right * forwardOffset
-                : Vector2.left * forwardOffset;
+            // Prefab'ın kendi rotasyonuyla oluştur (senin açın kalır)
+            GameObject wave = Instantiate(wavePrefab, waveSpawnPoint.position, wavePrefab.transform.rotation);
+
+            // 🆕 PARENT YAP: Karakterle beraber hareket etsin, arkada kalmasın!
+            wave.transform.SetParent(waveSpawnPoint);
+
+            // 🔄 SOLA BAKIYORSA: Ters çevir (scale.x = -1)
+            if (!playerMovement.facingRight)
+            {
+                Vector3 scale = wave.transform.localScale;
+                scale.x = -Mathf.Abs(scale.x);
+                wave.transform.localScale = scale;
+            }
+
+            // Animasyon bitince yok ol
+            Destroy(wave, waveDuration);
         }
 
-        Vector2 attackCenter = (Vector2)transform.position + offset;
+        // ⏱️ 2. BEKLE (dalganın ortasında)
+        yield return new WaitForSeconds(0.2f);
 
+        // 💥 3. HASAR VER (mevcut melee alani)
+        Vector2 attackCenter = (Vector2)transform.position;
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackCenter, attackRange, enemyLayer);
 
         foreach (Collider2D enemy in hitEnemies)
@@ -72,15 +92,18 @@ public class PlayerMelee : MonoBehaviour
             if (health != null) health.TakeDamage(attackDamage);
         }
 
-        yield return new WaitForSeconds(attackCooldown);
+        if (hitEnemies.Length > 0)
+            Debug.Log("Vurdu: " + hitEnemies.Length + " dusman");
+
+        // ⏱️ 4. KALAN COOLDOWN BEKLE (dalga bitsin + bekleme)
+        yield return new WaitForSeconds(attackCooldown - 0.2f);
         canAttack = true;
     }
 
     void OnDrawGizmosSelected()
     {
         if (playerMovement == null) return;
-        float offset = playerMovement.facingRight ? forwardOffset : -forwardOffset;
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position + Vector3.right * offset, attackRange);
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
