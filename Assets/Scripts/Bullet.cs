@@ -7,7 +7,7 @@ public class Bullet : MonoBehaviour
     public float damage = 20f;
     public float lifeTime = 2f;
 
-    [Header("Mermi Trail (Ghost)")]
+    [Header("Mermi Trail")]
     public bool useTrail = true;
     public float trailDelay = 0.03f;
     public float trailFadeTime = 0.2f;
@@ -21,18 +21,6 @@ public class Bullet : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
-
-        // KONTROL: Sprite var mı?
-        if (sr == null)
-        {
-            Debug.LogError("Kanka! Bullet'ta SpriteRenderer yok!");
-            return;
-        }
-        if (sr.sprite == null)
-        {
-            Debug.LogError("Kanka! Bullet SpriteRenderer'da sprite yok! Inspector'dan sprite at.");
-        }
-
         Destroy(gameObject, lifeTime);
 
         if (useTrail && sr != null && sr.sprite != null)
@@ -50,7 +38,6 @@ public class Bullet : MonoBehaviour
         {
             EnemyHealth health = other.GetComponent<EnemyHealth>();
             if (health != null) health.TakeDamage(damage);
-
             isAlive = false;
             Destroy(gameObject);
         }
@@ -78,15 +65,13 @@ public class Bullet : MonoBehaviour
         GameObject ghost = new GameObject("BulletGhost");
         ghost.transform.position = transform.position;
         ghost.transform.rotation = transform.rotation;
-        ghost.transform.localScale = transform.localScale; // Aynı scale, küçültme yok
+        ghost.transform.localScale = transform.localScale;
 
         SpriteRenderer ghostSr = ghost.AddComponent<SpriteRenderer>();
         ghostSr.sprite = sr.sprite;
         ghostSr.sortingLayerID = sr.sortingLayerID;
-        ghostSr.sortingOrder = sr.sortingOrder; // -1 yok, aynı order (görünür olsun)
+        ghostSr.sortingOrder = sr.sortingOrder;
         ghostSr.color = trailColor;
-
-        Debug.Log("Ghost oluştu! Pos: " + transform.position); // Test için
 
         StartCoroutine(FadeGhost(ghost, ghostSr));
     }
@@ -104,7 +89,6 @@ public class Bullet : MonoBehaviour
             yield return null;
         }
 
-        if (ghost != null)
-            Destroy(ghost);
+        if (ghost != null) Destroy(ghost);
     }
 }

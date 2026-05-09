@@ -53653,6 +53653,7 @@ GameObject:
   - component: {fileID: 508089028}
   - component: {fileID: 508089027}
   - component: {fileID: 508089031}
+  - component: {fileID: 508089032}
   m_Layer: 0
   m_Name: 'Player '
   m_TagString: Untagged
@@ -53819,6 +53820,9 @@ MonoBehaviour:
   ghostDelay: 0.03
   ghostFadeTime: 0.25
   ghostColor: {r: 0.7, g: 0.9, b: 1, a: 0.9098039}
+  speedParam: Speed
+  dashingParam: IsDashing
+  facingRight: 1
 --- !u!114 &508089028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53851,6 +53855,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponManager
   meleeItem: {fileID: 591504616}
   rangedWeapon: {fileID: 1796191168}
+--- !u!95 &508089032
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 508089022}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: bd344749c37e7a24e91d60432aa32c2b, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &590477789
 GameObject:
   m_ObjectHideFlags: 0
@@ -53933,6 +53959,9 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 8
+  forwardOffset: 0.5
+  rightPos: {x: 0.4, y: 0, z: 0}
+  leftPos: {x: -0.4, y: 0, z: 0}
 --- !u!212 &591504619
 SpriteRenderer:
   serializedVersion: 2
@@ -54807,6 +54836,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3257a652954868249bd43b3021b57fa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponController
+  distanceFromPlayer: 0.5
 --- !u!114 &1796191172
 MonoBehaviour:
   m_ObjectHideFlags: 0
