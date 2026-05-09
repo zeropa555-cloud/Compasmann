@@ -4,34 +4,40 @@ public class RangedEnemy : MonoBehaviour
 {
     [Header("Stats")]
     [SerializeField] private int maxHealth = 40;
+    [SerializeField] private int damage = 10;
+    [SerializeField] private float healthRegenRate = 5f;
+    [SerializeField] private float regenDelay = 2f;
 
-    [Header("❤️ GÖRÜŞ DIŞI CAN YENİLEME")]
-    [SerializeField] private float healthRegenRate = 5f;     // Saniyede 5 can
-    [SerializeField] private float regenDelay = 2f;          // Hasar alınca 2 sn bekle
-    [SerializeField] private bool showRegenLog = true;       // Console'da göster
+    [Header("🩸 LIFESTEAL")]
+    [SerializeField] private float lifestealPercent = 0.3f;
 
     [Header("Ateş")]
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform firePoint;
-    [SerializeField] private float fireRate = 1.5f;
+    [SerializeField] private float baseFireRate = 1.5f;
+    [SerializeField] private float rageFireRate = 0.4f;
     [SerializeField] private float attackRange = 7f;
 
-    [Header("Kaçma")]
+    [Header("Hareket")]
     [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private float lowHealthThreshold = 0.5f;
-    [SerializeField] private float fleeDistance = 8f;
-    [SerializeField] private float zigzagInterval = 0.4f;
+
+    [Header("😡 RAGE")]
+    [SerializeField] private float rageThreshold = 0.2f;    // %20 = RAGE!
+
+    [Header("💨 Mermi Kaçınma")]
+    [SerializeField] private float dodgeRange = 2.5f;
+    [SerializeField] private float dodgeForce = 12f;
+    [SerializeField] private float dodgeCooldown = 0.4f;
+    [SerializeField] private float dodgeThreshold = 0.5f;   // %50 can = Kaçınma
 
     private int currentHealth;
     private float fireTimer;
+    private float dodgeTimer;
     private float lastDamageTime;
     private Transform player;
     private Rigidbody2D rb;
     private FieldOfView fov;
-
-    private bool isFleeing = false;
-    private float zigzagTimer = 0f;
-    private int zigzagSide = 1;
+    private bool isRaging = false;
 
     void Start()
     {
@@ -45,6 +51,7 @@ public class RangedEnemy : MonoBehaviour
         if (firePoint == null) firePoint = transform;
 
         lastDamageTime = -999f;
+        dodgeTimer = 0f;
         fov = GetComponent<FieldOfView>();
     }
 
@@ -52,11 +59,12 @@ public class RangedEnemy : MonoBehaviour
     {
         if (player == null) return;
         fireTimer -= Time.deltaTime;
+        dodgeTimer -= Time.deltaTime;
 
         float healthPercent = (float)currentHealth / maxHealth;
 
-        // 🚫👁️ GÖRÜŞ DIŞINDAYSA CAN YENİLE! (Senin onu göremediğin/göremediği yerde)
-        bool isHidden = (fov == null) || !fov.CanSeeTarget;  // Player'ı göremiyorsa = Gizli
+        // Görüş dışındaysa can yenile
+        bool isHidden = (fov == null) || !fov.CanSeeTarget;
         bool canRegen = Time.time > lastDamageTime + regenDelay && currentHealth < maxHealth;
 
         if (canRegen && isHidden)
@@ -64,35 +72,12 @@ public class RangedEnemy : MonoBehaviour
             int prevHealth = currentHealth;
             currentHealth += Mathf.RoundToInt(healthRegenRate * Time.deltaTime);
             currentHealth = Mathf.Min(currentHealth, maxHealth);
-
-            if (showRegenLog && currentHealth > prevHealth)
-            {
-                Debug.Log("❤️ GÖRÜŞ DIŞINDA! Enemy can yenileniyor: " + prevHealth + " → " + currentHealth);
-            }
         }
 
-        // Can azaldı mı? KAÇ!
-        if (healthPercent <= lowHealthThreshold && !isFleeing)
+        // 💨 Mermi kaçınma kontrolü (%50 altındaysa)
+        if (currentHealth <= maxHealth * dodgeThreshold && dodgeTimer <= 0f)
         {
-            if (fov == null || fov.CanSeeTarget)
-            {
-                isFleeing = true;
-                zigzagTimer = 0f;
-                zigzagSide = Random.value > 0.5f ? 1 : -1;
-                Debug.Log("🏃 Enemy kaçıyor! Can: " + currentHealth);
-            }
-        }
-
-        // Yeterince uzaklaştı mı ve can doldu mu? Dön
-        if (isFleeing)
-        {
-            float dist = Vector2.Distance(transform.position, player.position);
-            if (dist >= fleeDistance && healthPercent >= 0.8f)
-            {
-                isFleeing = false;
-                rb.linearVelocity = Vector2.zero;
-                Debug.Log("✅ Enemy savaşa dönüyor! Can: " + currentHealth);
-            }
+            CheckForBulletsAndDodge();
         }
 
         FacePlayer();
@@ -101,40 +86,19 @@ public class RangedEnemy : MonoBehaviour
     void FixedUpdate()
     {
         if (player == null || rb == null) return;
-
-        // KAÇMA MODU (Zigzag)
-        if (isFleeing)
-        {
-            Vector2 fleeDir = ((Vector2)transform.position - (Vector2)player.position).normalized;
-
-            zigzagTimer += Time.fixedDeltaTime;
-            if (zigzagTimer >= zigzagInterval)
-            {
-                zigzagTimer = 0f;
-                zigzagSide *= -1;
-            }
-
-            float zigzagAngle = zigzagSide * 45f;
-            Vector2 zigzagDir = RotateVector(fleeDir, zigzagAngle);
-
-            rb.linearVelocity = zigzagDir * moveSpeed;
-            return;
-        }
-
-        // 🚫 GÖREMİYORSA IDLE (Dur)
         if (fov != null && !fov.CanSeeTarget)
         {
             rb.linearVelocity = Vector2.zero;
             return;
         }
 
-        // 🔫 NORMAL SAVAŞ (Görebiliyorsa)
         float distance = Vector2.Distance(transform.position, player.position);
+        float currentFireRate = isRaging ? rageFireRate : baseFireRate;
 
         if (distance <= attackRange && fireTimer <= 0f)
         {
             Shoot();
-            fireTimer = fireRate;
+            fireTimer = currentFireRate;
         }
 
         if (distance < 4f)
@@ -153,20 +117,63 @@ public class RangedEnemy : MonoBehaviour
         }
     }
 
-    Vector2 RotateVector(Vector2 v, float degrees)
+    // 💨 MERMİ KAÇINMA
+    void CheckForBulletsAndDodge()
     {
-        float rad = degrees * Mathf.Deg2Rad;
-        float sin = Mathf.Sin(rad);
-        float cos = Mathf.Cos(rad);
-        return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, dodgeRange);
+
+        foreach (var hit in hits)
+        {
+            if (!hit.CompareTag("Bullet")) continue;
+
+            Projectile proj = hit.GetComponent<Projectile>();
+            if (proj == null) continue;
+
+            Vector2 toBullet = (hit.transform.position - transform.position).normalized;
+            float dot = Vector2.Dot(toBullet, proj.MoveDirection);
+
+            if (dot < -0.2f)
+            {
+                // 🎲 1/3 şans (33%)
+                if (Random.value <= 0.33f)
+                {
+                    PerformDodge(proj.MoveDirection);
+                    dodgeTimer = dodgeCooldown;
+                }
+                break;
+            }
+        }
+    }
+
+    void PerformDodge(Vector2 bulletDir)
+    {
+        Vector2 dodgeDir = Vector2.Perpendicular(bulletDir).normalized;
+        if (Random.value > 0.5f) dodgeDir = -dodgeDir;
+
+        rb.AddForce(dodgeDir * dodgeForce, ForceMode2D.Impulse);
+
+        Debug.Log("💨 RANGED Enemy mermiden KAÇTI!");
     }
 
     void Shoot()
     {
         Vector2 dir = (player.position - firePoint.position).normalized;
         GameObject b = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
-        EnemyProjectile p = b.GetComponent<EnemyProjectile>();
-        if (p != null) p.Setup(dir);
+
+        EnemyProjectile proj = b.GetComponent<EnemyProjectile>();
+        if (proj != null)
+        {
+            proj.Setup(dir);
+            proj.SetOwner(this, damage, lifestealPercent);
+        }
+    }
+
+    public void OnProjectileHitPlayer(int damageDealt)
+    {
+        int healAmount = Mathf.RoundToInt(damageDealt * lifestealPercent);
+        currentHealth = Mathf.Min(currentHealth + healAmount, maxHealth);
+
+        Debug.Log("🩸 RANGED can ÇEKTİ! +" + healAmount);
     }
 
     void FacePlayer()
@@ -182,18 +189,13 @@ public class RangedEnemy : MonoBehaviour
         currentHealth -= dmg;
         lastDamageTime = Time.time;
 
-        Debug.Log("🩸 Enemy hasar aldı! " + prevHealth + " → " + currentHealth);
+        Debug.Log("🩸 RANGED hasar aldı! " + prevHealth + " → " + currentHealth);
 
-        StartCoroutine(HitFlash());
-
-        if ((float)currentHealth / maxHealth <= lowHealthThreshold && !isFleeing)
+        // 😡 RAGE: %20 altına düşünce
+        if (!isRaging && (float)currentHealth / maxHealth <= rageThreshold)
         {
-            if (fov == null || fov.CanSeeTarget)
-            {
-                isFleeing = true;
-                zigzagTimer = 0f;
-                zigzagSide = Random.value > 0.5f ? 1 : -1;
-            }
+            isRaging = true;
+            Debug.Log("😡 RANGED RAGE! Ateş: " + baseFireRate + " → " + rageFireRate);
         }
 
         if (currentHealth <= 0)
@@ -211,5 +213,14 @@ public class RangedEnemy : MonoBehaviour
         sr.color = Color.white;
         yield return new WaitForSeconds(0.1f);
         sr.color = o;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, dodgeRange);
     }
 }

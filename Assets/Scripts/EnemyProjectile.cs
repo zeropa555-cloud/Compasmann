@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class EnemyProjectile : MonoBehaviour
 {
@@ -9,10 +9,23 @@ public class EnemyProjectile : MonoBehaviour
     private Vector2 moveDirection;
     private float lifeTimer;
 
+    private RangedEnemy owner;
+    private int ownerDamage;
+    private float ownerLifesteal;
+    private bool hasLifesteal = false;
+
     public void Setup(Vector2 direction)
     {
         moveDirection = direction.normalized;
         lifeTimer = lifeTime;
+    }
+
+    public void SetOwner(RangedEnemy enemy, int dmg, float lifesteal)
+    {
+        owner = enemy;
+        ownerDamage = dmg;
+        ownerLifesteal = lifesteal;
+        hasLifesteal = true;
     }
 
     void Update()
@@ -25,16 +38,21 @@ public class EnemyProjectile : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Kendi mermilerine çarpmasýn
         if (other.CompareTag("Enemy") || other.CompareTag("EnemyBullet"))
             return;
 
-        // Player'a hasar ver
         if (other.CompareTag("Player"))
         {
             PlayerStats playerStats = other.GetComponent<PlayerStats>();
             if (playerStats != null)
+            {
                 playerStats.TakeDamage(damage);
+
+                if (hasLifesteal && owner != null)
+                {
+                    owner.OnProjectileHitPlayer(damage);
+                }
+            }
         }
 
         Destroy(gameObject);
