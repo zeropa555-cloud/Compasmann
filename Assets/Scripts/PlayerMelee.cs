@@ -58,16 +58,12 @@ public class PlayerMelee : MonoBehaviour
     {
         canAttack = false;
 
-        // 🎬 1. MIKNATIS DALGASI SPAWN
+        // 🎬 MIKNATIS DALGASI SPAWN
         if (wavePrefab != null && waveSpawnPoint != null)
         {
-            // Prefab'ın kendi rotasyonuyla oluştur (senin açın kalır)
             GameObject wave = Instantiate(wavePrefab, waveSpawnPoint.position, wavePrefab.transform.rotation);
-
-            // 🆕 PARENT YAP: Karakterle beraber hareket etsin, arkada kalmasın!
             wave.transform.SetParent(waveSpawnPoint);
 
-            // 🔄 SOLA BAKIYORSA: Ters çevir (scale.x = -1)
             if (!playerMovement.facingRight)
             {
                 Vector3 scale = wave.transform.localScale;
@@ -75,14 +71,12 @@ public class PlayerMelee : MonoBehaviour
                 wave.transform.localScale = scale;
             }
 
-            // Animasyon bitince yok ol
             Destroy(wave, waveDuration);
         }
 
-        // ⏱️ 2. BEKLE (dalganın ortasında)
         yield return new WaitForSeconds(0.2f);
 
-        // 💥 3. HASAR VER (mevcut melee alani)
+        // 💥 HASAR VER (MELEE - alan içindeki düşmanlar)
         Vector2 attackCenter = (Vector2)transform.position;
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackCenter, attackRange, enemyLayer);
 
@@ -93,17 +87,30 @@ public class PlayerMelee : MonoBehaviour
         }
 
         if (hitEnemies.Length > 0)
-            Debug.Log("Vurdu: " + hitEnemies.Length + " dusman");
+            Debug.Log("Melee vurdu: " + hitEnemies.Length + " dusman");
 
-        // ⏱️ 4. KALAN COOLDOWN BEKLE (dalga bitsin + bekleme)
         yield return new WaitForSeconds(attackCooldown - 0.2f);
         canAttack = true;
     }
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
-        if (playerMovement == null) return;
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        if (playerMovement != null)
+        {
+            Gizmos.color = new Color(1f, 0.2f, 0.2f, 0.9f);
+            Gizmos.DrawWireSphere(transform.position, attackRange);
+
+            float dir = playerMovement.facingRight ? 1f : -1f;
+            Vector3 forward = new Vector3(dir * attackRange, 0, 0);
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawRay(transform.position, forward);
+            Gizmos.DrawSphere(transform.position + forward, 0.08f);
+        }
+        else
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, attackRange);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Bullet : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class Bullet : MonoBehaviour
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private bool isAlive = true;
+    private List<GameObject> activeGhosts = new List<GameObject>();
 
     void Awake()
     {
@@ -34,6 +36,7 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        // Düşmana carpinca hasar ver (RANGED)
         if (other.CompareTag("Enemy"))
         {
             EnemyHealth health = other.GetComponent<EnemyHealth>();
@@ -42,11 +45,21 @@ public class Bullet : MonoBehaviour
             Destroy(gameObject);
         }
 
+        // Duvara carpinca yok ol
         if (other.gameObject.layer == LayerMask.NameToLayer("Wall"))
         {
             isAlive = false;
             Destroy(gameObject);
         }
+    }
+
+    void OnDestroy()
+    {
+        foreach (GameObject ghost in activeGhosts)
+        {
+            if (ghost != null) Destroy(ghost);
+        }
+        activeGhosts.Clear();
     }
 
     IEnumerator SpawnTrail()
@@ -73,6 +86,7 @@ public class Bullet : MonoBehaviour
         ghostSr.sortingOrder = sr.sortingOrder;
         ghostSr.color = trailColor;
 
+        activeGhosts.Add(ghost);
         StartCoroutine(FadeGhost(ghost, ghostSr));
     }
 
@@ -89,6 +103,10 @@ public class Bullet : MonoBehaviour
             yield return null;
         }
 
-        if (ghost != null) Destroy(ghost);
+        if (ghost != null)
+        {
+            activeGhosts.Remove(ghost);
+            Destroy(ghost);
+        }
     }
 }

@@ -11,17 +11,14 @@ public class EnemyHealth : MonoBehaviour
     {
         currentHealth = maxHealth;
         sr = GetComponent<SpriteRenderer>();
-
-        // Orijinal rengi kaydet (kýrmýzý placeholder)
-        if (sr != null)
-            originalColor = sr.color;
+        if (sr != null) originalColor = sr.color;
     }
 
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
 
-        // BEYAZ FLASH (anlýk)
+        // Hasar aninda BEYAZ FLASH (0.1sn)
         if (sr != null)
         {
             sr.color = Color.white;
@@ -34,9 +31,8 @@ public class EnemyHealth : MonoBehaviour
 
     void ResetColor()
     {
-        // Kendi orijinal rengine dön (KIRMIZI)
-        if (sr != null)
-            sr.color = originalColor;
+        // Kendi orijinal rengine don (beyaz degil!)
+        if (sr != null) sr.color = originalColor;
     }
 
     void Die()

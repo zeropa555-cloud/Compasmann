@@ -11,14 +11,10 @@ public class PlayerHealth : MonoBehaviour
     public bool isInvincible { get; private set; }
 
     private Animator anim;
-    private SpriteRenderer sr;
-    private Color normalColor;
 
     void Awake()
     {
         currentHealth = maxHealth;
-        sr = GetComponent<SpriteRenderer>();
-        if (sr != null) normalColor = sr.color;
 
         anim = GetComponent<Animator>();
         if (anim == null) anim = GetComponentInChildren<Animator>();
@@ -26,20 +22,7 @@ public class PlayerHealth : MonoBehaviour
         if (healthSlider != null) healthSlider.maxValue = maxHealth;
     }
 
-    void Start()
-    {
-        UpdateHealthUI();
-    }
-
-    void Update()
-    {
-        // 🎮 TEST: H tuşuna basınca kendine 10 hasar ver
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            TakeDamage(10f);
-            Debug.Log("TEST: Hasar alindi! Animasyon calisiyor mu?");
-        }
-    }
+    void Start() { UpdateHealthUI(); }
 
     public void TakeDamage(float amount)
     {
@@ -49,7 +32,7 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
         UpdateHealthUI();
 
-        // 🎬 Hasar alinca trigger calisir
+        // 🎬 Hasar alinca HIT animasyonu (kirmizi yok, sadece animasyon)
         if (anim != null) anim.SetTrigger("Hit");
 
         StartCoroutine(InvincibilityFrames());
@@ -72,20 +55,15 @@ public class PlayerHealth : MonoBehaviour
     {
         isInvincible = true;
 
-        if (sr != null)
-        {
-            sr.color = Color.red;
-            yield return new WaitForSeconds(0.1f);
-            sr.color = normalColor;
-        }
-
+        // Sadece bekle, renk degisimi YOK
         yield return new WaitForSeconds(invincibilityDuration);
+
         isInvincible = false;
     }
 
     void Die()
     {
-        Debug.Log("Kanka oldun!");
+        Debug.Log("Oldun!");
         transform.position = Vector3.zero;
         currentHealth = maxHealth;
         UpdateHealthUI();
