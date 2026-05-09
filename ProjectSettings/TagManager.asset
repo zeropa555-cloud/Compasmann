@@ -6,7 +6,6 @@ TagManager:
   tags:
   - Bullet
   - Destructible
-  - wall
   - Enemy
   - Wall
   - EnemyBullet
