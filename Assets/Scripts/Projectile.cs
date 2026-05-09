@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
@@ -18,7 +18,6 @@ public class Projectile : MonoBehaviour
     void Update()
     {
         transform.position += (Vector3)(moveDirection * speed * Time.deltaTime);
-
         lifeTimer -= Time.deltaTime;
         if (lifeTimer <= 0f)
             Destroy(gameObject);
@@ -26,19 +25,30 @@ public class Projectile : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Kendi mermilerine çarpmasýn
-        if (other.CompareTag("Bullet"))
+        // Kendi mermilerine Ã§arpmasÄ±n
+        if (other.CompareTag("Bullet") || other.CompareTag("EnemyBullet"))
             return;
 
-        // Player'a çarpmasýn (mermi Player'ýn içinden çýkýyor olabilir)
+        // Player'a Ã§arpmasÄ±n
         if (other.CompareTag("Player"))
             return;
 
-        // Düþmana hasar ver
+        // ðŸŽ¯ MELEE DÃœÅžMANA hasar ver (Enemy scripti)
         Enemy enemy = other.GetComponent<Enemy>();
         if (enemy != null)
         {
             enemy.TakeDamage(damage);
+            Destroy(gameObject);
+            return;
+        }
+
+        // ðŸŽ¯ RANGED DÃœÅžMANA hasar ver (RangedEnemy scripti)
+        RangedEnemy rangedEnemy = other.GetComponent<RangedEnemy>();
+        if (rangedEnemy != null)
+        {
+            rangedEnemy.TakeDamage(damage);
+            Destroy(gameObject);
+            return;
         }
 
         Destroy(gameObject);
