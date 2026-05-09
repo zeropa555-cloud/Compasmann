@@ -1,7 +1,26 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: fb18f4d9c254ab6478759855d2b87a75
+=======
+guid: a5094f7f0abb74341b3e6b75c6d59acc
+>>>>>>> a465949763652605a66bd3a490eee3d6d1e246b5
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: 3681972224329236095
+    second: "T\u0130LE SET B\u0130YOM 2_0"
+  - first:
+      213: 7047200907463641836
+    second: "T\u0130LE SET B\u0130YOM 2_1"
+  - first:
+      213: -8934043331961845321
+    second: "T\u0130LE SET B\u0130YOM 2_2"
+  - first:
+      213: 1434341612629657842
+    second: "T\u0130LE SET B\u0130YOM 2_3"
+  - first:
+      213: -6252098193383771319
+    second: "T\u0130LE SET B\u0130YOM 2_4"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -39,7 +58,7 @@ TextureImporter:
     mipBias: 0
     wrapU: 1
     wrapV: 1
-    wrapW: 0
+    wrapW: 1
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
@@ -63,16 +82,16 @@ TextureImporter:
   compressionQualitySet: 0
   textureFormatSet: 0
   ignorePngGamma: 0
-  applyGammaDecoding: 1
+  applyGammaDecoding: 0
   swizzle: 50462976
-  cookieLightType: 2
+  cookieLightType: 0
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -85,7 +104,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -98,7 +117,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -106,12 +125,14 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+<<<<<<< HEAD
+=======
   - serializedVersion: 4
     buildTarget: WindowsStoreApps
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -119,6 +140,7 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+>>>>>>> a465949763652605a66bd3a490eee3d6d1e246b5
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -126,20 +148,20 @@ TextureImporter:
       name: "T\u0130LE SET B\u0130YOM 2_0"
       rect:
         serializedVersion: 2
-        x: 3
-        y: 3
-        width: 96
-        height: 96
+        x: 2
+        y: 2
+        width: 98
+        height: 98
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: fbefec873b425524ba1da9ffaa2a7849
-      internalID: -1561590523
+      spriteID: f7ebff7ea3ef81330800000000000000
+      internalID: 3681972224329236095
       vertices: []
       indices: 
       edges: []
@@ -148,20 +170,20 @@ TextureImporter:
       name: "T\u0130LE SET B\u0130YOM 2_1"
       rect:
         serializedVersion: 2
-        x: 105
-        y: 3
-        width: 96
-        height: 96
+        x: 104
+        y: 2
+        width: 98
+        height: 98
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 99d9c17bc5f3ada48bdae1feb22d58d7
-      internalID: 1087331826
+      spriteID: cea4e2e33efacc160800000000000000
+      internalID: 7047200907463641836
       vertices: []
       indices: 
       edges: []
@@ -170,20 +192,20 @@ TextureImporter:
       name: "T\u0130LE SET B\u0130YOM 2_2"
       rect:
         serializedVersion: 2
-        x: 207
-        y: 3
-        width: 96
-        height: 96
+        x: 206
+        y: 2
+        width: 98
+        height: 98
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 1c92ce01cf4de254b93ad4fbc02d8ab0
-      internalID: -2002925662
+      spriteID: 7b987769ce6e30480800000000000000
+      internalID: -8934043331961845321
       vertices: []
       indices: 
       edges: []
@@ -192,20 +214,20 @@ TextureImporter:
       name: "T\u0130LE SET B\u0130YOM 2_3"
       rect:
         serializedVersion: 2
-        x: 312
-        y: 3
-        width: 96
-        height: 96
+        x: 311
+        y: 2
+        width: 98
+        height: 98
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 7d82bc54a6d2d4448b15211d36c642bf
-      internalID: 1210226258
+      spriteID: 2f80a53e81ec7e310800000000000000
+      internalID: 1434341612629657842
       vertices: []
       indices: 
       edges: []
@@ -214,42 +236,20 @@ TextureImporter:
       name: "T\u0130LE SET B\u0130YOM 2_4"
       rect:
         serializedVersion: 2
-        x: 411
-        y: 3
-        width: 96
-        height: 96
+        x: 410
+        y: 2
+        width: 98
+        height: 98
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 585dfeb21ca61fc4b95e3228a9c22922
-      internalID: -1028260027
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: "T\u0130LE SET B\u0130YOM 2_5"
-      rect:
-        serializedVersion: 2
-        x: 510
-        y: 3
-        width: 96
-        height: 96
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f987c95d5e1da224da3a25d28dcf7cb7
-      internalID: -1978048913
+      spriteID: 943bf7271d51c39a0800000000000000
+      internalID: -6252098193383771319
       vertices: []
       indices: 
       edges: []
@@ -258,7 +258,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 6c48b6de51975d045bf9c128ce4d6f30
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -266,16 +266,13 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      "T\u0130LE SET B\u0130YOM 2_0": -1561590523
-      "T\u0130LE SET B\u0130YOM 2_1": 1087331826
-      "T\u0130LE SET B\u0130YOM 2_2": -2002925662
-      "T\u0130LE SET B\u0130YOM 2_3": 1210226258
-      "T\u0130LE SET B\u0130YOM 2_4": -1028260027
-      "T\u0130LE SET B\u0130YOM 2_5": -1978048913
+      "T\u0130LE SET B\u0130YOM 2_0": 3681972224329236095
+      "T\u0130LE SET B\u0130YOM 2_1": 7047200907463641836
+      "T\u0130LE SET B\u0130YOM 2_2": -8934043331961845321
+      "T\u0130LE SET B\u0130YOM 2_3": 1434341612629657842
+      "T\u0130LE SET B\u0130YOM 2_4": -6252098193383771319
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
