@@ -1,47 +1,28 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
-    [Header("Can")]
     public float maxHealth = 100f;
     public float currentHealth;
-
-    [Header("UI")]
     public Slider healthSlider;
-
-    [Header("Yenilmezlik (i-frames)")]
     public float invincibilityDuration = 0.5f;
     public bool isInvincible { get; private set; }
 
-    [Header("Visual")]
-    public Color normalColor = Color.white;
-    public Color hitColor = Color.red;
-    private SpriteRenderer sr;
+    private Animator anim;
 
     void Awake()
     {
         currentHealth = maxHealth;
-        sr = GetComponent<SpriteRenderer>();
 
-        if (healthSlider != null)
-            healthSlider.maxValue = maxHealth;
+        anim = GetComponent<Animator>();
+        if (anim == null) anim = GetComponentInChildren<Animator>();
+
+        if (healthSlider != null) healthSlider.maxValue = maxHealth;
     }
 
-    void Start()
-    {
-        UpdateHealthUI();
-    }
-
-    void Update()
-    {
-        // TEST: H tuþuna basýnca kendine 10 hasar ver
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            TakeDamage(10f);
-        }
-    }
+    void Start() { UpdateHealthUI(); }
 
     public void TakeDamage(float amount)
     {
@@ -49,15 +30,13 @@ public class PlayerHealth : MonoBehaviour
 
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
-
         UpdateHealthUI();
-        StartCoroutine(InvincibilityFrames());
 
-        // Ölüm kontrolü
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
+        // ðŸŽ¬ Hasar alinca HIT animasyonu (kirmizi yok, sadece animasyon)
+        if (anim != null) anim.SetTrigger("Hit");
+
+        StartCoroutine(InvincibilityFrames());
+        if (currentHealth <= 0) Die();
     }
 
     public void Heal(float amount)
@@ -69,38 +48,25 @@ public class PlayerHealth : MonoBehaviour
 
     void UpdateHealthUI()
     {
-        if (healthSlider != null)
-            healthSlider.value = currentHealth;
+        if (healthSlider != null) healthSlider.value = currentHealth;
     }
 
     IEnumerator InvincibilityFrames()
     {
         isInvincible = true;
 
-        // Kýrmýzý yanýp sönme efekti
-        if (sr != null)
-        {
-            sr.color = hitColor;
-            yield return new WaitForSeconds(0.1f);
-            sr.color = normalColor;
-        }
-
-        // Yenilmezlik süresi
+        // Sadece bekle, renk degisimi YOK
         yield return new WaitForSeconds(invincibilityDuration);
+
         isInvincible = false;
     }
 
     void Die()
     {
-        Debug.Log("Kanka öldün! Game Over...");
-
-        // Basit respawn: Pozisyonu sýfýrla, caný fulle
-        // Ýleride sahne yeniden yüklenebilir veya Game Over ekraný gelir
+        Debug.Log("Oldun!");
         transform.position = Vector3.zero;
         currentHealth = maxHealth;
         UpdateHealthUI();
-
-        // Ghost trail'i durdurmak için (eðer hala dash'te kaldýysa)
         isInvincible = false;
     }
 }

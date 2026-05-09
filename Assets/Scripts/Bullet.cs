@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Bullet : MonoBehaviour
 {
@@ -7,7 +8,7 @@ public class Bullet : MonoBehaviour
     public float damage = 20f;
     public float lifeTime = 2f;
 
-    [Header("Mermi Trail (Ghost)")]
+    [Header("Mermi Trail")]
     public bool useTrail = true;
     public float trailDelay = 0.03f;
     public float trailFadeTime = 0.2f;
@@ -16,22 +17,15 @@ public class Bullet : MonoBehaviour
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private bool isAlive = true;
+    private List<GameObject> activeGhosts = new List<GameObject>();
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
 
-        // KONTROL: Sprite var mı?
-        if (sr == null)
-        {
-            Debug.LogError("Kanka! Bullet'ta SpriteRenderer yok!");
-            return;
-        }
-        if (sr.sprite == null)
-        {
-            Debug.LogError("Kanka! Bullet SpriteRenderer'da sprite yok! Inspector'dan sprite at.");
-        }
+        // 🆕 Çok hızlı mermi takılmasın diye Continuous yap
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
         Destroy(gameObject, lifeTime);
 
@@ -46,20 +40,28 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        // Kendine veya Player'a çarpma
+        if (other.CompareTag("Bullet") || other.CompareTag("Player")) return;
+
+        // Düşmana çarpınca hasar ver
         if (other.CompareTag("Enemy"))
         {
             EnemyHealth health = other.GetComponent<EnemyHealth>();
             if (health != null) health.TakeDamage(damage);
-
-            isAlive = false;
-            Destroy(gameObject);
         }
 
-        if (other.gameObject.layer == LayerMask.NameToLayer("Wall"))
+        // 🆕 HERHANGİ BİR COLLIDER'A ÇARPIINCA YOK OL (duvar, düşman, vs.)
+        isAlive = false;
+        Destroy(gameObject);
+    }
+
+    void OnDestroy()
+    {
+        foreach (GameObject ghost in activeGhosts)
         {
-            isAlive = false;
-            Destroy(gameObject);
+            if (ghost != null) Destroy(ghost);
         }
+        activeGhosts.Clear();
     }
 
     IEnumerator SpawnTrail()
@@ -78,16 +80,15 @@ public class Bullet : MonoBehaviour
         GameObject ghost = new GameObject("BulletGhost");
         ghost.transform.position = transform.position;
         ghost.transform.rotation = transform.rotation;
-        ghost.transform.localScale = transform.localScale; // Aynı scale, küçültme yok
+        ghost.transform.localScale = transform.localScale;
 
         SpriteRenderer ghostSr = ghost.AddComponent<SpriteRenderer>();
         ghostSr.sprite = sr.sprite;
         ghostSr.sortingLayerID = sr.sortingLayerID;
-        ghostSr.sortingOrder = sr.sortingOrder; // -1 yok, aynı order (görünür olsun)
+        ghostSr.sortingOrder = sr.sortingOrder;
         ghostSr.color = trailColor;
 
-        Debug.Log("Ghost oluştu! Pos: " + transform.position); // Test için
-
+        activeGhosts.Add(ghost);
         StartCoroutine(FadeGhost(ghost, ghostSr));
     }
 
@@ -105,6 +106,9 @@ public class Bullet : MonoBehaviour
         }
 
         if (ghost != null)
+        {
+            activeGhosts.Remove(ghost);
             Destroy(ghost);
+        }
     }
 }

@@ -16,27 +16,54 @@ public class PlayerMovement : MonoBehaviour
     [Header("Ghost Trail")]
     public float ghostDelay = 0.03f;
     public float ghostFadeTime = 0.3f;
-    public Color ghostColor = new Color(0.5f, 0.8f, 1f, 0.7f); // Daha belirgin alpha
+    public Color ghostColor = new Color(0.5f, 0.8f, 1f, 0.7f);
+
+    [Header("Animasyon")]
+    public string speedParam = "Speed";
+    public string dashingParam = "IsDashing";
+
+    [Header("Yön")]
+    public bool facingRight = true;
 
     private Rigidbody2D rb;
     private SpriteRenderer sr;
+    private Animator anim;
     private Vector2 moveInput;
     private Vector2 lastMoveDir = Vector2.down;
     private bool canDash = true;
 
+    // 🆕 Visual (Capsule/Sprite) scale sabitleme
+    private Transform visualTransform;
+    private Vector3 originalVisualScale;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        // SpriteRenderer'ı bul (Player veya child Capsule'da)
         sr = GetComponent<SpriteRenderer>();
+        if (sr == null)
+            sr = GetComponentInChildren<SpriteRenderer>();
+
+        // 🆕 Visual objenin transformunu ve orijinal scale'ini al
+        if (sr != null)
+        {
+            visualTransform = sr.transform;
+            originalVisualScale = visualTransform.localScale;
+        }
+
+        anim = GetComponent<Animator>();
+        if (anim == null)
+            anim = GetComponentInChildren<Animator>();
 
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
 
-        // Eğer sprite atanmamışsa uyar
-        if (sr.sprite == null)
-        {
-            Debug.LogError("Kanka! Player'in SpriteRenderer'inda sprite yok. Inspector'dan sprite at.");
-        }
+        if (sr != null && sr.sprite == null)
+            Debug.LogError("Kanka! Player SpriteRenderer'inda sprite yok.");
+
+        if (anim == null)
+            Debug.LogWarning("Kanka! Animator bulunamadi.");
     }
 
     void Update()
@@ -45,8 +72,23 @@ public class PlayerMovement : MonoBehaviour
         float v = Input.GetAxisRaw("Vertical");
         moveInput = new Vector2(h, v).normalized;
 
+        // 🔄 A/D ILE SAĞA/SOLA DÖNME
+        if (h > 0) facingRight = true;
+        else if (h < 0) facingRight = false;
+        if (sr != null) sr.flipX = !facingRight;
+
         if (moveInput != Vector2.zero)
             lastMoveDir = moveInput;
+
+        // 🎬 ANIMATOR (Idle/Walk geçişi için Speed gönder)
+        if (anim != null)
+        {
+            float currentSpeed = rb.linearVelocity.magnitude;
+            anim.SetFloat(speedParam, currentSpeed);
+
+            if (!string.IsNullOrEmpty(dashingParam))
+                anim.SetBool(dashingParam, isDashing);
+        }
 
         if (Input.GetKeyDown(KeyCode.Space) && canDash && !isDashing)
             StartCoroutine(Dash());
@@ -56,6 +98,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isDashing)
             rb.linearVelocity = moveInput * moveSpeed;
+    }
+
+    void LateUpdate()
+    {
+        // 🆕 Animasyondan sonra visual scale'i sabitle (Walk büyütmesin)
+        if (visualTransform != null && visualTransform.localScale != originalVisualScale)
+            visualTransform.localScale = originalVisualScale;
     }
 
     IEnumerator Dash()
@@ -88,7 +137,7 @@ public class PlayerMovement : MonoBehaviour
 
     void CreateGhost()
     {
-        if (sr.sprite == null) return; // Sprite yoksa çık
+        if (sr == null || sr.sprite == null) return;
 
         GameObject ghost = new GameObject("Ghost");
         ghost.transform.position = transform.position;
@@ -97,15 +146,9 @@ public class PlayerMovement : MonoBehaviour
 
         SpriteRenderer ghostSr = ghost.AddComponent<SpriteRenderer>();
         ghostSr.sprite = sr.sprite;
-
-        // Sorting Layer AYNI kalsın, order'ı Player ile AYNI yap (negatif olmasın)
         ghostSr.sortingLayerID = sr.sortingLayerID;
-        ghostSr.sortingOrder = sr.sortingOrder; // -1 yerine aynı değerde
-
-        // Başlangıç rengi (tam görünür)
+        ghostSr.sortingOrder = sr.sortingOrder;
         ghostSr.color = ghostColor;
-
-        // Fizik etkileşimi olmasın
         ghost.layer = gameObject.layer;
 
         StartCoroutine(FadeGhost(ghost, ghostSr));

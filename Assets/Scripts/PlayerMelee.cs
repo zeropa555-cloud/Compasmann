@@ -1,49 +1,116 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 
 public class PlayerMelee : MonoBehaviour
 {
-    [Header("Melee Alan Hasarý")]
+    [Header("Saldiri Alani (Hasar Veren)")]
     public float attackRange = 1.8f;
     public float attackDamage = 30f;
-    public float attackCooldown = 0.4f;
+    public float attackCooldown = 0.6f;
     public LayerMask enemyLayer;
 
+    [Header("Miknatis Dalga (Sadece Animasyon)")]
+    public GameObject wavePrefab;
+    public Transform waveSpawnPoint;
+    public float waveDuration = 0.4f;
+
+    [Header("YÃ¶n & Pozisyon")]
+    public Vector3 rightPos = new Vector3(0.4f, 0, 0);
+    public Vector3 leftPos = new Vector3(-0.4f, 0, 0);
+
     private bool canAttack = true;
+    private PlayerMovement playerMovement;
+    private SpriteRenderer sr;
+
+    void Awake()
+    {
+        playerMovement = GetComponentInParent<PlayerMovement>();
+        sr = GetComponent<SpriteRenderer>();
+    }
 
     void Update()
     {
-        // SOL CLICK = Etrafýna hasar (sadece bu item aktifken çalýþýr)
+        if (playerMovement == null) return;
+
+        // SAÄžA BAKIYOR (D) â†’ Z = -90
+        if (playerMovement.facingRight)
+        {
+            transform.localPosition = rightPos;
+            transform.localRotation = Quaternion.Euler(0, 0, -90f);
+            if (sr != null) sr.flipX = false;
+        }
+        // SOLA BAKIYOR (A) â†’ Z = +90
+        else
+        {
+            transform.localPosition = leftPos;
+            transform.localRotation = Quaternion.Euler(0, 0, 90f);
+            if (sr != null) sr.flipX = true;
+        }
+
+        // SOL CLICK = Saldiri
         if (Input.GetMouseButtonDown(0) && canAttack)
         {
-            StartCoroutine(PerformMelee());
+            StartCoroutine(PerformAttack());
         }
     }
 
-    IEnumerator PerformMelee()
+    IEnumerator PerformAttack()
     {
         canAttack = false;
 
-        // Etrafýndaki düþmanlara hasar
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayer);
+        // ðŸŽ¬ MIKNATIS DALGASI SPAWN
+        if (wavePrefab != null && waveSpawnPoint != null)
+        {
+            GameObject wave = Instantiate(wavePrefab, waveSpawnPoint.position, wavePrefab.transform.rotation);
+            wave.transform.SetParent(waveSpawnPoint);
+
+            if (!playerMovement.facingRight)
+            {
+                Vector3 scale = wave.transform.localScale;
+                scale.x = -Mathf.Abs(scale.x);
+                wave.transform.localScale = scale;
+            }
+
+            Destroy(wave, waveDuration);
+        }
+
+        yield return new WaitForSeconds(0.2f);
+
+        // ðŸ’¥ HASAR VER (MELEE - alan iÃ§indeki dÃ¼ÅŸmanlar)
+        Vector2 attackCenter = (Vector2)transform.position;
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackCenter, attackRange, enemyLayer);
 
         foreach (Collider2D enemy in hitEnemies)
         {
             EnemyHealth health = enemy.GetComponent<EnemyHealth>();
-            if (health != null)
-                health.TakeDamage(attackDamage);
+            if (health != null) health.TakeDamage(attackDamage);
         }
 
         if (hitEnemies.Length > 0)
-            Debug.Log("Item vurdu: " + hitEnemies.Length + " düþman");
+            Debug.Log("Melee vurdu: " + hitEnemies.Length + " dusman");
 
-        yield return new WaitForSeconds(attackCooldown);
+        yield return new WaitForSeconds(attackCooldown - 0.2f);
         canAttack = true;
     }
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        if (playerMovement != null)
+        {
+            Gizmos.color = new Color(1f, 0.2f, 0.2f, 0.9f);
+            Gizmos.DrawWireSphere(transform.position, attackRange);
+
+            float dir = playerMovement.facingRight ? 1f : -1f;
+            Vector3 forward = new Vector3(dir * attackRange, 0, 0);
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawRay(transform.position, forward);
+            Gizmos.DrawSphere(transform.position + forward, 0.08f);
+        }
+        else
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, attackRange);
+        }
     }
 }

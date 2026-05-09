@@ -2,9 +2,8 @@ using UnityEngine;
 
 public class PlayerShooting : MonoBehaviour
 {
-    [Header("Ateþ Ayarlarý")]
     public GameObject bulletPrefab;
-    public Transform firePoint;  // RangedWeapon/FirePoint
+    public Transform firePoint;
     public float fireRate = 0.25f;
 
     private float lastFireTime;
@@ -23,7 +22,6 @@ public class PlayerShooting : MonoBehaviour
     {
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         Bullet b = bullet.GetComponent<Bullet>();
-        if (b != null)
-            b.SetDirection(firePoint.right);
+        if (b != null) b.SetDirection(firePoint.right);
     }
 }
