@@ -23,6 +23,10 @@ public class Bullet : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
+
+        // 🆕 Çok hızlı mermi takılmasın diye Continuous yap
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
         Destroy(gameObject, lifeTime);
 
         if (useTrail && sr != null && sr.sprite != null)
@@ -36,21 +40,19 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Düşmana carpinca hasar ver (RANGED)
+        // Kendine veya Player'a çarpma
+        if (other.CompareTag("Bullet") || other.CompareTag("Player")) return;
+
+        // Düşmana çarpınca hasar ver
         if (other.CompareTag("Enemy"))
         {
             EnemyHealth health = other.GetComponent<EnemyHealth>();
             if (health != null) health.TakeDamage(damage);
-            isAlive = false;
-            Destroy(gameObject);
         }
 
-        // Duvara carpinca yok ol
-        if (other.gameObject.layer == LayerMask.NameToLayer("Wall"))
-        {
-            isAlive = false;
-            Destroy(gameObject);
-        }
+        // 🆕 HERHANGİ BİR COLLIDER'A ÇARPIINCA YOK OL (duvar, düşman, vs.)
+        isAlive = false;
+        Destroy(gameObject);
     }
 
     void OnDestroy()

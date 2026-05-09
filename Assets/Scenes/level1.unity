@@ -53888,9 +53888,10 @@ GameObject:
   - component: {fileID: 519610220}
   - component: {fileID: 519610219}
   - component: {fileID: 519610218}
-  m_Layer: 0
+  - component: {fileID: 519610223}
+  m_Layer: 3
   m_Name: AjanMan_0
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -53909,15 +53910,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
   player: {fileID: 508089026}
   moveSpeed: 3
-  stopDistance: 1.5
-  attackRange: 1.8
-  attackDamage: 15
-  attackCooldown: 1.2
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  sr: {fileID: 0}
   weaponVisual: {fileID: 1284787639}
+  weaponRightPos: {x: 0.3, y: 0, z: 0}
+  weaponLeftPos: {x: -0.3, y: 0, z: 0}
+  weaponRightRot: -90
+  weaponLeftRot: 90
 --- !u!50 &519610219
 Rigidbody2D:
   serializedVersion: 5
@@ -54059,13 +54056,26 @@ Transform:
   m_GameObject: {fileID: 519610217}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 40.99, y: -0.81, z: 0}
+  m_LocalPosition: {x: 41.309, y: -0.81, z: 0}
   m_LocalScale: {x: 2.9087095, y: 3.0066, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1284787639}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519610223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519610217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79daab1c7f17a3047ac63fb766d4d39a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  maxHealth: 50
 --- !u!1 &590477789
 GameObject:
   m_ObjectHideFlags: 0
@@ -54731,7 +54741,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1284787639}
   - component: {fileID: 1284787640}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: "D\xDC\u015EMAN KILICI_0"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
