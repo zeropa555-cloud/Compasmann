@@ -131,8 +131,10 @@ GameObject:
   - component: {fileID: 98468452}
   - component: {fileID: 98468451}
   - component: {fileID: 98468455}
-  - component: {fileID: 98468454}
+  - component: {fileID: 98468458}
+  - component: {fileID: 98468457}
   - component: {fileID: 98468456}
+  - component: {fileID: 98468459}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -242,8 +244,65 @@ Transform:
   - {fileID: 1161024648}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &98468454
-BoxCollider2D:
+--- !u!114 &98468455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 98468450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6159d884f96f16c4b9f341a25d3a4f2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  moveSpeed: 8
+--- !u!114 &98468456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 98468450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c24fca9d28f97f4d9b8defc0f2a3c70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
+  maxHealth: 100
+--- !u!114 &98468457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 98468450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3257a652954868249bd43b3021b57fa3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponController
+  gunObject: {fileID: 1161024647}
+  firePoint: {fileID: 98468453}
+  bulletPrefab: {fileID: 3094728311153391582, guid: 5f1ad1041cfac9b468b7b562d3a2d5ec, type: 3}
+  fireRate: 0.2
+--- !u!114 &98468458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 98468450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45eb47032b0449a4d84b82069314beae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeAttack
+  damage: 5
+  attackCooldown: 0.5
+  attackRange: 1.2
+--- !u!70 &98468459
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -276,44 +335,9 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 2}
-    newSize: {x: 1, y: 2}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 2}
-  m_EdgeRadius: 0
---- !u!114 &98468455
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 98468450}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6159d884f96f16c4b9f341a25d3a4f2d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  moveSpeed: 8
---- !u!114 &98468456
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 98468450}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c24fca9d28f97f4d9b8defc0f2a3c70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  maxHealth: 100
+  m_Offset: {x: -0.00000023841858, y: -0.006176591}
+  m_Size: {x: 1.1235318, y: 2.0988247}
+  m_Direction: 0
 --- !u!1 &316963591
 GameObject:
   m_ObjectHideFlags: 0
@@ -777,7 +801,6 @@ GameObject:
   - component: {fileID: 1161024648}
   - component: {fileID: 1161024651}
   - component: {fileID: 1161024650}
-  - component: {fileID: 1161024649}
   m_Layer: 0
   m_Name: Gun
   m_TagString: Untagged
@@ -800,21 +823,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 98468453}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1161024649
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1161024647}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3257a652954868249bd43b3021b57fa3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WeaponController
-  bulletPrefab: {fileID: 3094728311153391582, guid: 5f1ad1041cfac9b468b7b562d3a2d5ec, type: 3}
-  firePoint: {fileID: 1161024648}
-  fireRate: 0.2
 --- !u!114 &1161024650
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1286,7 +1294,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   maxHealth: 30
   damage: 10
-  attackRange: 1.2
+  attackRange: 1
   attackCooldown: 1
 --- !u!114 &1986973089
 MonoBehaviour:
@@ -1301,7 +1309,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeAI
   moveSpeed: 3
-  stopDistance: 1.3
+  stopDistance: 0.8
 --- !u!70 &1986973090
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
