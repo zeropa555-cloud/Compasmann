@@ -6,7 +6,6 @@ TagManager:
   tags:
   - Bullet
   - Destructible
-  - wall
   - Enemy
   - Wall
   - EnemyBullet
@@ -47,6 +46,12 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: zemin
+    uniqueID: 3830235167
+    locked: 0
+  - name: karakter
+    uniqueID: 1501978831
     locked: 0
   m_RenderingLayers:
   - Default
