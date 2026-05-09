@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: fe19dc8d84cac834bad14ead38c6f9e0
+=======
+guid: 345efdbdffd656b408aa9218377ae1ee
+>>>>>>> a465949763652605a66bd3a490eee3d6d1e246b5
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -109,6 +113,22 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+<<<<<<< HEAD
+=======
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+>>>>>>> a465949763652605a66bd3a490eee3d6d1e246b5
   spriteSheet:
     serializedVersion: 2
     sprites:
