@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Compasmannn.slnx"
+    "dotnet.defaultSolution": "Compasmannm.slnx"
 }
