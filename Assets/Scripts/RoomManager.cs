@@ -16,6 +16,10 @@ public class RoomManager : MonoBehaviour
     [Header("Spawn Noktaları")]
     public List<SpawnPoint> spawnPoints = new List<SpawnPoint>();
 
+    [Header("🆕 KARAKTER DOĞMA NOKTASI")]
+    public Transform playerSpawnPoint;  // 🆕 Boş obje, karakter burada doğar
+    public Color spawnGizmoColor = Color.green;
+
     [Header("Zaman Ayarları")]
     public float doorCloseDelay = 1f;
     public float checkInterval = 0.5f;
@@ -65,7 +69,7 @@ public class RoomManager : MonoBehaviour
             if (sp != null)
             {
                 sp.enabled = true;
-                totalSpawned += sp.maxSpawnCount;  // 🆕 maxSpawnCount kullan
+                totalSpawned += sp.maxSpawnCount;
             }
         }
         Debug.Log("👾 Toplam " + totalSpawned + " düşman spawn edilecek");
@@ -123,6 +127,15 @@ public class RoomManager : MonoBehaviour
             d.col.enabled = false;
     }
 
+    // 🆕 DOĞMA NOKTASINI AL (PlayerHealth çağıracak)
+    public Vector3 GetSpawnPosition()
+    {
+        if (playerSpawnPoint != null)
+            return playerSpawnPoint.position;
+
+        return transform.position; // Fallback: Room merkezi
+    }
+
     void OnDrawGizmos()
     {
         Gizmos.color = roomGizmoColor;
@@ -131,6 +144,15 @@ public class RoomManager : MonoBehaviour
         Gizmos.color = Color.red;
         Vector3 wallSize = new Vector3(roomSize.x - wallOffset.x * 2, roomSize.y - wallOffset.y * 2, 0);
         Gizmos.DrawWireCube(transform.position, wallSize);
+
+        // 🆕 DOĞMA NOKTASI GÖRSEL (yeşil ok + yazı)
+        if (playerSpawnPoint != null)
+        {
+            Gizmos.color = spawnGizmoColor;
+            Gizmos.DrawWireSphere(playerSpawnPoint.position, 0.3f);
+            Gizmos.DrawLine(transform.position, playerSpawnPoint.position);
+            Gizmos.DrawRay(playerSpawnPoint.position, Vector3.up * 0.5f);
+        }
 
         foreach (var d in doors)
         {

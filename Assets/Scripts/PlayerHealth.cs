@@ -32,7 +32,6 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
         UpdateHealthUI();
 
-        // 🎬 Hasar alinca HIT animasyonu (kirmizi yok, sadece animasyon)
         if (anim != null) anim.SetTrigger("Hit");
 
         StartCoroutine(InvincibilityFrames());
@@ -54,19 +53,46 @@ public class PlayerHealth : MonoBehaviour
     IEnumerator InvincibilityFrames()
     {
         isInvincible = true;
-
-        // Sadece bekle, renk degisimi YOK
         yield return new WaitForSeconds(invincibilityDuration);
-
         isInvincible = false;
     }
 
     void Die()
     {
         Debug.Log("Oldun!");
-        transform.position = Vector3.zero;
+
+        RoomManager nearestRoom = FindNearestRoom();
+
+        if (nearestRoom != null)
+        {
+            transform.position = nearestRoom.GetSpawnPosition();
+            Debug.Log("🔄 " + nearestRoom.name + " odasındaki doğma noktasında yeniden doğdun!");
+        }
+        else
+        {
+            transform.position = Vector3.zero;
+        }
+
         currentHealth = maxHealth;
         UpdateHealthUI();
         isInvincible = false;
+    }
+
+    RoomManager FindNearestRoom()
+    {
+        RoomManager[] rooms = FindObjectsOfType<RoomManager>();
+        RoomManager nearest = null;
+        float minDist = Mathf.Infinity;
+
+        foreach (var room in rooms)
+        {
+            float dist = Vector2.Distance(transform.position, room.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearest = room;
+            }
+        }
+        return nearest;
     }
 }

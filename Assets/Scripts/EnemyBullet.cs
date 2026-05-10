@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyBullet : MonoBehaviour
 {
@@ -20,18 +20,28 @@ public class EnemyBullet : MonoBehaviour
         rb.linearVelocity = dir * speed;
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    // 🆕 FİZİKSEL ÇARPIŞMA (IsTrigger = false)
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        // Kendi mermisi veya d��man� ge�
-        if (other.CompareTag("Enemy") || other.CompareTag("EnemyBullet")) return;
+        GameObject target = collision.gameObject;
+
+        // 🎯 ROOM'A ÇARPIINCA: GEÇ, YOK OLMA! (Room IsTrigger=true olduğu için zaten çarpmaz ama garanti)
+        if (target.CompareTag("Room") || target.CompareTag("Ground"))
+        {
+            return;
+        }
+
+        // Düşman ve kendi mermisi geç
+        if (target.CompareTag("Enemy") || target.CompareTag("EnemyBullet")) return;
 
         // Player'a hasar ver
-        if (other.CompareTag("Player"))
+        if (target.CompareTag("Player"))
         {
-            PlayerHealth health = other.GetComponent<PlayerHealth>();
+            PlayerHealth health = target.GetComponent<PlayerHealth>();
             if (health != null) health.TakeDamage(damage);
         }
 
+        // Duvar veya herhangi bir şeye çarpınca yok ol
         Destroy(gameObject);
     }
 }
