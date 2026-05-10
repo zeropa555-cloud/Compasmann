@@ -13,6 +13,10 @@ public class PlayerMovement : MonoBehaviour
     public float dashCooldown = 0.8f;
     public bool isDashing { get; private set; }
 
+    [Header("Ses Ayarlari")]
+    public AudioSource sesKaynagi;
+    public AudioClip dashSesi;
+
     [Header("Ghost Trail")]
     public float ghostDelay = 0.03f;
     public float ghostFadeTime = 0.3f;
@@ -32,7 +36,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 lastMoveDir = Vector2.down;
     private bool canDash = true;
 
-    // 🆕 Visual (Capsule/Sprite) scale sabitleme
     private Transform visualTransform;
     private Vector3 originalVisualScale;
 
@@ -40,12 +43,12 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
-        // SpriteRenderer'ı bul (Player veya child Capsule'da)
+        // SpriteRenderer'ı bul
         sr = GetComponent<SpriteRenderer>();
         if (sr == null)
             sr = GetComponentInChildren<SpriteRenderer>();
 
-        // 🆕 Visual objenin transformunu ve orijinal scale'ini al
+        // Visual objenin transformunu ve orijinal scale'ini al
         if (sr != null)
         {
             visualTransform = sr.transform;
@@ -58,12 +61,6 @@ public class PlayerMovement : MonoBehaviour
 
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
-
-        if (sr != null && sr.sprite == null)
-            Debug.LogError("Kanka! Player SpriteRenderer'inda sprite yok.");
-
-        if (anim == null)
-            Debug.LogWarning("Kanka! Animator bulunamadi.");
     }
 
     void Update()
@@ -72,15 +69,16 @@ public class PlayerMovement : MonoBehaviour
         float v = Input.GetAxisRaw("Vertical");
         moveInput = new Vector2(h, v).normalized;
 
-        // 🔄 A/D ILE SAĞA/SOLA DÖNME
+        // A/D ILE SAĞA/SOLA DÖNME
         if (h > 0) facingRight = true;
         else if (h < 0) facingRight = false;
+        
         if (sr != null) sr.flipX = !facingRight;
 
         if (moveInput != Vector2.zero)
             lastMoveDir = moveInput;
 
-        // 🎬 ANIMATOR (Idle/Walk geçişi için Speed gönder)
+        // ANIMATOR
         if (anim != null)
         {
             float currentSpeed = rb.linearVelocity.magnitude;
@@ -102,7 +100,7 @@ public class PlayerMovement : MonoBehaviour
 
     void LateUpdate()
     {
-        // 🆕 Animasyondan sonra visual scale'i sabitle (Walk büyütmesin)
+        // Animasyondan sonra visual scale'i sabitle
         if (visualTransform != null && visualTransform.localScale != originalVisualScale)
             visualTransform.localScale = originalVisualScale;
     }
@@ -111,6 +109,12 @@ public class PlayerMovement : MonoBehaviour
     {
         isDashing = true;
         canDash = false;
+
+        // DASH SESİNİ ÇALMA
+        if (sesKaynagi != null && dashSesi != null)
+        {
+            sesKaynagi.PlayOneShot(dashSesi);
+        }
 
         Vector2 dashDir = (moveInput != Vector2.zero) ? moveInput : lastMoveDir;
         rb.linearVelocity = dashDir * dashSpeed;
