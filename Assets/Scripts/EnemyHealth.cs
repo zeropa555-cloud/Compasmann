@@ -8,36 +8,40 @@ public class EnemyHealth : MonoBehaviour
     private Color originalColor;
 
     [Header("Animasyon")]
-    public Animator anim;                    // 🆕 Düşmanın Animator'u
-    public string hitTrigger = "Hit";        // 🆕 Trigger adı
+    public Animator anim;
+    public string hitTrigger = "Hit";
+
+    private RoomManager myRoom;
+    private bool isDead = false;
 
     void Awake()
     {
         currentHealth = maxHealth;
         sr = GetComponent<SpriteRenderer>();
         if (sr != null) originalColor = sr.color;
-
-        // 🆕 Animator'ı bul
         if (anim == null) anim = GetComponent<Animator>();
+    }
+
+    // 🆕 RoomManager'dan çağrılır
+    public void SetRoom(RoomManager room)
+    {
+        myRoom = room;
     }
 
     public void TakeDamage(float amount)
     {
+        if (isDead) return;
+
         currentHealth -= amount;
 
-        // 🎬 HASAR ALINCA HIT ANİMASYONU OYNAT
-        if (anim != null)
-            anim.SetTrigger(hitTrigger);
-
-        // Kısa beyaz flash (animasyonun yanında)
+        if (anim != null) anim.SetTrigger(hitTrigger);
         if (sr != null)
         {
             sr.color = Color.white;
             Invoke(nameof(ResetColor), 0.1f);
         }
 
-        if (currentHealth <= 0)
-            Die();
+        if (currentHealth <= 0) Die();
     }
 
     void ResetColor()
@@ -47,6 +51,12 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
+        if (isDead) return;
+        isDead = true;
+
+        // 🆕 ROOM'A HABER VER (ölmeden önce!)
+        if (myRoom != null) myRoom.OnEnemyDied();
+
         Destroy(gameObject);
     }
 }

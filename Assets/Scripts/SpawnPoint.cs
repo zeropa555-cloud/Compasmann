@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class SpawnPoint : MonoBehaviour
 {
     [Header("Spawn Ayarları")]
-    public List<GameObject> enemyPrefabs = new List<GameObject>(); // 🆕 2+ düşman prefabı
+    public List<GameObject> enemyPrefabs = new List<GameObject>();
     public int maxSpawnCount = 5;
     public float spawnInterval = 2f;
     public float startDelay = 1f;
@@ -16,6 +16,13 @@ public class SpawnPoint : MonoBehaviour
     private int spawnedCount = 0;
     private float nextSpawnTime;
     private bool isActive = false;
+    private RoomManager myRoom;
+
+    // 🆕 RoomManager'dan çağrılır
+    public void SetRoom(RoomManager room)
+    {
+        myRoom = room;
+    }
 
     void OnEnable()
     {
@@ -26,7 +33,7 @@ public class SpawnPoint : MonoBehaviour
     void Update()
     {
         if (!isActive) return;
-        if (enemyPrefabs.Count == 0) return; // 🆕 Liste boşsa dur
+        if (enemyPrefabs.Count == 0) return;
         if (spawnedCount >= maxSpawnCount) return;
 
         if (Time.time >= nextSpawnTime)
@@ -39,12 +46,21 @@ public class SpawnPoint : MonoBehaviour
 
     void SpawnEnemy()
     {
-        // 🆕 RASTGELE DÜŞMAN SEÇ (0 veya 1)
         int randomIndex = Random.Range(0, enemyPrefabs.Count);
-        GameObject selectedPrefab = enemyPrefabs[randomIndex];
+        GameObject prefab = enemyPrefabs[randomIndex];
+        if (prefab == null) return;
 
-        if (selectedPrefab != null)
-            Instantiate(selectedPrefab, transform.position, Quaternion.identity);
+        GameObject enemy = Instantiate(prefab, transform.position, Quaternion.identity);
+
+        // 🆕 DÜŞMANA BU ODAYI ATA
+        EnemyHealth health = enemy.GetComponent<EnemyHealth>();
+        if (health != null)
+        {
+            health.SetRoom(myRoom);
+        }
+
+        // 🆕 ROOM'A HABER VER
+        if (myRoom != null) myRoom.OnEnemySpawned();
     }
 
     void OnDrawGizmos()

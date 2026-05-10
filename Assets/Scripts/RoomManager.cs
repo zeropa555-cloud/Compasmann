@@ -16,23 +16,23 @@ public class RoomManager : MonoBehaviour
     [Header("Spawn Noktaları")]
     public List<SpawnPoint> spawnPoints = new List<SpawnPoint>();
 
-    [Header("🆕 KARAKTER DOĞMA NOKTASI")]
-    public Transform playerSpawnPoint;  // 🆕 Boş obje, karakter burada doğar
+    [Header("Karakter Doğma Noktası")]
+    public Transform playerSpawnPoint;
     public Color spawnGizmoColor = Color.green;
 
     [Header("Zaman Ayarları")]
     public float doorCloseDelay = 1f;
-    public float checkInterval = 0.5f;
 
+    // 🆕 KESİN SAYAÇLAR
+    private int enemiesSpawned = 0;   // Toplam kaç düşman çıktı
+    private int enemiesKilled = 0;    // Kaç düşman öldü
     private bool playerInside = false;
     private bool battleActive = false;
     private bool roomCleared = false;
-    private int totalSpawned = 0;
 
     void Start()
     {
-        foreach (var d in doors)
-            OpenDoor(d);
+        foreach (var d in doors) OpenDoor(d);
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -48,92 +48,77 @@ public class RoomManager : MonoBehaviour
     {
         Debug.Log("⏳ " + doorCloseDelay + " saniye sonra kapılar kapanacak...");
         yield return new WaitForSeconds(doorCloseDelay);
-
         if (roomCleared) yield break;
 
         Debug.Log("🚪 KAPILAR KAPANDI!");
         battleActive = true;
-
-        foreach (var d in doors)
-            CloseDoor(d);
+        foreach (var d in doors) CloseDoor(d);
 
         StartSpawns();
-        StartCoroutine(CheckEnemiesRoutine());
     }
 
     void StartSpawns()
     {
-        totalSpawned = 0;
+        enemiesSpawned = 0;
+        enemiesKilled = 0;
+
         foreach (var sp in spawnPoints)
         {
             if (sp != null)
             {
                 sp.enabled = true;
-                totalSpawned += sp.maxSpawnCount;
+                // SpawnPoint kendi sayısını RoomManager'a bildirecek
+                sp.SetRoom(this);
             }
         }
-        Debug.Log("👾 Toplam " + totalSpawned + " düşman spawn edilecek");
     }
 
-    System.Collections.IEnumerator CheckEnemiesRoutine()
+    // 🆕 DÜŞMAN DOĞUNCA ÇAĞRILIR
+    public void OnEnemySpawned()
     {
-        while (battleActive && !roomCleared)
+        enemiesSpawned++;
+        Debug.Log("👾 Düşman doğdu! Toplam: " + enemiesSpawned);
+    }
+
+    // 🆕 DÜŞMAN ÖLÜNCE ÇAĞRILIR
+    public void OnEnemyDied()
+    {
+        enemiesKilled++;
+        Debug.Log("💀 Düşman öldü! Ölen: " + enemiesKilled + " / " + enemiesSpawned);
+
+        // 🎯 HEPSİ ÖLÜNCE AÇ (enemiesSpawned > 0 garantisi)
+        if (enemiesKilled >= enemiesSpawned && enemiesSpawned > 0)
         {
-            yield return new WaitForSeconds(checkInterval);
-
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-
-            int aliveInRoom = 0;
-            foreach (var e in enemies)
-            {
-                if (e == null) continue;
-                float dist = Vector2.Distance(e.transform.position, transform.position);
-                if (dist < roomSize.magnitude * 0.7f)
-                    aliveInRoom++;
-            }
-
-            if (aliveInRoom <= 0 && totalSpawned > 0)
-            {
-                RoomCleared();
-            }
+            RoomCleared();
         }
     }
 
     void RoomCleared()
     {
+        if (roomCleared) return;
         roomCleared = true;
         battleActive = false;
-        Debug.Log("✅ TÜM DÜŞMANLAR ÖLDÜ! Kapılar açılıyor...");
+        Debug.Log("✅ ODA TEMİZLENDİ! Kapılar açılıyor...");
 
-        foreach (var d in doors)
-            OpenDoor(d);
+        foreach (var d in doors) OpenDoor(d);
     }
 
     void CloseDoor(DoorInfo d)
     {
-        if (d.animator != null)
-            d.animator.SetTrigger(d.closeTrigger);
-
-        if (d.col != null)
-            d.col.enabled = true;
+        if (d.animator != null) d.animator.SetTrigger(d.closeTrigger);
+        if (d.col != null) d.col.enabled = true;
     }
 
     void OpenDoor(DoorInfo d)
     {
-        if (d.animator != null)
-            d.animator.SetTrigger(d.openTrigger);
-
-        if (d.col != null)
-            d.col.enabled = false;
+        if (d.animator != null) d.animator.SetTrigger(d.openTrigger);
+        if (d.col != null) d.col.enabled = false;
     }
 
-    // 🆕 DOĞMA NOKTASINI AL (PlayerHealth çağıracak)
     public Vector3 GetSpawnPosition()
     {
-        if (playerSpawnPoint != null)
-            return playerSpawnPoint.position;
-
-        return transform.position; // Fallback: Room merkezi
+        if (playerSpawnPoint != null) return playerSpawnPoint.position;
+        return transform.position;
     }
 
     void OnDrawGizmos()
@@ -145,13 +130,11 @@ public class RoomManager : MonoBehaviour
         Vector3 wallSize = new Vector3(roomSize.x - wallOffset.x * 2, roomSize.y - wallOffset.y * 2, 0);
         Gizmos.DrawWireCube(transform.position, wallSize);
 
-        // 🆕 DOĞMA NOKTASI GÖRSEL (yeşil ok + yazı)
         if (playerSpawnPoint != null)
         {
             Gizmos.color = spawnGizmoColor;
             Gizmos.DrawWireSphere(playerSpawnPoint.position, 0.3f);
             Gizmos.DrawLine(transform.position, playerSpawnPoint.position);
-            Gizmos.DrawRay(playerSpawnPoint.position, Vector3.up * 0.5f);
         }
 
         foreach (var d in doors)
