@@ -5,7 +5,7 @@ public class PlayerShooting : MonoBehaviour
     public GameObject bulletPrefab;
     public Transform firePoint;
     public float fireRate = 0.25f;
-    
+
     [Header("Ses Ayarlari")]
     public AudioSource sesKaynagi;
     public AudioClip lazerSesi;
@@ -14,7 +14,6 @@ public class PlayerShooting : MonoBehaviour
 
     void Update()
     {
-        // Sol Click basıldığında ve ateş etme süresi dolduğunda çalışır
         if (Input.GetMouseButtonDown(0) && Time.time >= lastFireTime + fireRate)
         {
             Shoot();
@@ -24,19 +23,22 @@ public class PlayerShooting : MonoBehaviour
 
     void Shoot()
     {
-        // Ses çalma komutu
+        // Ses çalma
         if (sesKaynagi != null && lazerSesi != null)
         {
             sesKaynagi.PlayOneShot(lazerSesi);
         }
 
-        // Mermi oluşturma komutu
+        // Mermi oluşturma
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        
+
         Bullet b = bullet.GetComponent<Bullet>();
-        if (b != null) 
+        if (b != null)
         {
             b.SetDirection(firePoint.right);
         }
+
+        // 🆕 ATEŞ HİSSİ — Ekran sallasın!
+        CameraShake.Instance?.Shake(0.08f, 0.05f);
     }
 }

@@ -32,14 +32,12 @@ public class PlayerMelee : MonoBehaviour
     {
         if (playerMovement == null) return;
 
-        // SAĞA BAKIYOR (D) → Z = -90
         if (playerMovement.facingRight)
         {
             transform.localPosition = rightPos;
             transform.localRotation = Quaternion.Euler(0, 0, -90f);
             if (sr != null) sr.flipX = false;
         }
-        // SOLA BAKIYOR (A) → Z = +90
         else
         {
             transform.localPosition = leftPos;
@@ -47,7 +45,6 @@ public class PlayerMelee : MonoBehaviour
             if (sr != null) sr.flipX = true;
         }
 
-        // SOL CLICK = Saldiri
         if (Input.GetMouseButtonDown(0) && canAttack)
         {
             StartCoroutine(PerformAttack());
@@ -58,7 +55,6 @@ public class PlayerMelee : MonoBehaviour
     {
         canAttack = false;
 
-        // 🎬 MIKNATIS DALGASI SPAWN
         if (wavePrefab != null && waveSpawnPoint != null)
         {
             GameObject wave = Instantiate(wavePrefab, waveSpawnPoint.position, wavePrefab.transform.rotation);
@@ -76,18 +72,23 @@ public class PlayerMelee : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
 
-        // 💥 HASAR VER (MELEE - alan içindeki düşmanlar)
+        // 💥 HASAR VER (Alan içindeki her şeye)
         Vector2 attackCenter = (Vector2)transform.position;
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackCenter, attackRange, enemyLayer);
+        Collider2D[] hitTargets = Physics2D.OverlapCircleAll(attackCenter, attackRange, enemyLayer);
 
-        foreach (Collider2D enemy in hitEnemies)
+        foreach (Collider2D target in hitTargets)
         {
-            EnemyHealth health = enemy.GetComponent<EnemyHealth>();
+            // 🆕 DÜŞMAN
+            EnemyHealth health = target.GetComponent<EnemyHealth>();
             if (health != null) health.TakeDamage(attackDamage);
+
+            // 🆕 BOSS
+            BossHealth bossHealth = target.GetComponent<BossHealth>();
+            if (bossHealth != null) bossHealth.TakeDamage(attackDamage);
         }
 
-        if (hitEnemies.Length > 0)
-            Debug.Log("Melee vurdu: " + hitEnemies.Length + " dusman");
+        if (hitTargets.Length > 0)
+            Debug.Log("Melee vurdu: " + hitTargets.Length + " hedef");
 
         yield return new WaitForSeconds(attackCooldown - 0.2f);
         canAttack = true;

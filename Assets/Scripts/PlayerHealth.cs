@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
@@ -10,16 +11,24 @@ public class PlayerHealth : MonoBehaviour
     public float invincibilityDuration = 0.5f;
     public bool isInvincible { get; private set; }
 
+    [Header("Yeniden Doğma")]
+    public int extraLives = 2;           // 🆕 2 kere yeniden doğma (toplam 3 can)
+    public Text livesText;               // 🆕 UI (isteğe bağlı, Canvas'e Text ekle)
+    public float respawnDelay = 1f;    // 🆕 Ölünce bekleme süresi
+
+    private int currentLives;
     private Animator anim;
 
     void Awake()
     {
         currentHealth = maxHealth;
+        currentLives = extraLives;
 
         anim = GetComponent<Animator>();
         if (anim == null) anim = GetComponentInChildren<Animator>();
 
         if (healthSlider != null) healthSlider.maxValue = maxHealth;
+        UpdateLivesUI();
     }
 
     void Start() { UpdateHealthUI(); }
@@ -50,6 +59,11 @@ public class PlayerHealth : MonoBehaviour
         if (healthSlider != null) healthSlider.value = currentHealth;
     }
 
+    void UpdateLivesUI()
+    {
+        if (livesText != null) livesText.text = "❤ " + (currentLives + 1);
+    }
+
     IEnumerator InvincibilityFrames()
     {
         isInvincible = true;
@@ -59,22 +73,45 @@ public class PlayerHealth : MonoBehaviour
 
     void Die()
     {
-        Debug.Log("Oldun!");
+        currentLives--;
+        UpdateLivesUI();
 
-        RoomManager nearestRoom = FindNearestRoom();
+        // 🆕 HAK BİTTİYSE OYUNU SIFIRLA (Restart)
+        if (currentLives < 0)
+        {
+            Debug.Log("💀 TÜM CANLAR BİTTİ! Oyun sıfırdan başlıyor...");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            return;
+        }
 
-        if (nearestRoom != null)
-        {
-            transform.position = nearestRoom.GetSpawnPosition();
-            Debug.Log("🔄 " + nearestRoom.name + " odasındaki doğma noktasında yeniden doğdun!");
-        }
-        else
-        {
-            transform.position = Vector3.zero;
-        }
+        Debug.Log("💀 Öldün! Kalan hak: " + (currentLives + 1));
+        StartCoroutine(Respawn());
+    }
+
+    IEnumerator Respawn()
+    {
+        yield return new WaitForSeconds(respawnDelay);
 
         currentHealth = maxHealth;
         UpdateHealthUI();
+
+        // 🆕 BOSS ODASINDA MIYIZ?
+        BossRoomManager bossRoom = FindObjectOfType<BossRoomManager>();
+        if (bossRoom != null && bossRoom.IsPlayerInside())
+        {
+            transform.position = bossRoom.GetSpawnPosition();
+            Debug.Log("🔄 Boss odasında yeniden doğdun!");
+        }
+        else
+        {
+            // Normal oda spawn'u
+            RoomManager nearestRoom = FindNearestRoom();
+            if (nearestRoom != null)
+                transform.position = nearestRoom.GetSpawnPosition();
+            else
+                transform.position = Vector3.zero;
+        }
+
         isInvincible = false;
     }
 

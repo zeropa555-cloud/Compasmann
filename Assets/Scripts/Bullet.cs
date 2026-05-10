@@ -42,21 +42,17 @@ public class Bullet : MonoBehaviour
             rb.linearVelocity = dir * speed;
     }
 
-    // 🆕 SADECE FİZİKSEL ÇARPIŞMA
     void OnCollisionEnter2D(Collision2D collision)
     {
         GameObject target = collision.gameObject;
 
-        Debug.Log("💥 Çarptı: " + target.name + " | Tag: " + target.tag);
-
-        // 🎯 ROOM'A ÇARPIINCA: HİÇBİR ŞEY YAPMA! (Geç, yok olma!)
+        // 🎯 ROOM'A ÇARPIINCA: GEÇ
         if (target.CompareTag("Room"))
         {
-            Debug.Log("ℹ️ Room - geçiyor");
-            return; // Sadece return, yok olma!
+            return;
         }
 
-        // 🆕 ZEMİN/DUVAR çarpınca yok ol
+        // Zemin/duvar
         if (target.CompareTag("Wall") || target.CompareTag("Ground"))
         {
             isAlive = false;
@@ -64,29 +60,32 @@ public class Bullet : MonoBehaviour
             return;
         }
 
-        // 🆕 DÜŞMANIN CHILD OBJESİ (kılıç) ise parent'a bak
-        if (!target.CompareTag("Enemy") && target.transform.parent != null)
+        // Child obje ise parent'a bak (kılıç vs.)
+        if (!target.CompareTag("Enemy") && !target.CompareTag("Boss") && target.transform.parent != null)
         {
             target = target.transform.parent.gameObject;
-            Debug.Log("🔄 Parent: " + target.name);
         }
 
-        // 🆕 DÜŞMANA ÇARPIINCA: Hasar ver ve yok ol
+        // 🆕 DÜŞMANA ÇARPIINCA
         if (target.CompareTag("Enemy"))
         {
             EnemyHealth health = target.GetComponent<EnemyHealth>();
-            if (health != null)
-            {
-                health.TakeDamage(damage);
-                Debug.Log("✅ Hasar: " + damage);
-            }
+            if (health != null) health.TakeDamage(damage);
+
+            isAlive = false;
+            Destroy(gameObject);
+        }
+        // 🆕 BOSS'A ÇARPIINCA
+        else if (target.CompareTag("Boss"))
+        {
+            BossHealth bossHealth = target.GetComponent<BossHealth>();
+            if (bossHealth != null) bossHealth.TakeDamage(damage);
 
             isAlive = false;
             Destroy(gameObject);
         }
         else
         {
-            // Başka her şeye çarpınca yok ol (isteğe bağlı)
             isAlive = false;
             Destroy(gameObject);
         }

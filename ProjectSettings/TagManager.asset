@@ -8,6 +8,8 @@ TagManager:
   - Bullet
   - Room
   - EnemyBullet
+  - Boss
+  - BossTop
   layers:
   - Default
   - TransparentFX
