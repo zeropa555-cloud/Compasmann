@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class SpawnPoint : MonoBehaviour
 {
     [Header("Spawn Ayarları")]
-    public GameObject enemyPrefab;
-    public int maxSpawnCount = 5;        // 🆕 maxCount yerine maxSpawnCount
+    public List<GameObject> enemyPrefabs = new List<GameObject>(); // 🆕 2+ düşman prefabı
+    public int maxSpawnCount = 5;
     public float spawnInterval = 2f;
     public float startDelay = 1f;
 
@@ -25,15 +26,25 @@ public class SpawnPoint : MonoBehaviour
     void Update()
     {
         if (!isActive) return;
-        if (enemyPrefab == null) return;
-        if (spawnedCount >= maxSpawnCount) return;  // 🆕 maxSpawnCount kullan
+        if (enemyPrefabs.Count == 0) return; // 🆕 Liste boşsa dur
+        if (spawnedCount >= maxSpawnCount) return;
 
         if (Time.time >= nextSpawnTime)
         {
-            Instantiate(enemyPrefab, transform.position, Quaternion.identity);
+            SpawnEnemy();
             spawnedCount++;
             nextSpawnTime = Time.time + spawnInterval;
         }
+    }
+
+    void SpawnEnemy()
+    {
+        // 🆕 RASTGELE DÜŞMAN SEÇ (0 veya 1)
+        int randomIndex = Random.Range(0, enemyPrefabs.Count);
+        GameObject selectedPrefab = enemyPrefabs[randomIndex];
+
+        if (selectedPrefab != null)
+            Instantiate(selectedPrefab, transform.position, Quaternion.identity);
     }
 
     void OnDrawGizmos()
