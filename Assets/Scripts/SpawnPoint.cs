@@ -18,7 +18,12 @@ public class SpawnPoint : MonoBehaviour
     private bool isActive = false;
     private RoomManager myRoom;
 
-    // 🆕 RoomManager'dan çağrılır
+    void Awake()
+    {
+        // 🆕 BAŞLANGIÇTA KAPALI! RoomManager açana kadar spawn etmez
+        enabled = false;
+    }
+
     public void SetRoom(RoomManager room)
     {
         myRoom = room;
@@ -52,14 +57,9 @@ public class SpawnPoint : MonoBehaviour
 
         GameObject enemy = Instantiate(prefab, transform.position, Quaternion.identity);
 
-        // 🆕 DÜŞMANA BU ODAYI ATA
         EnemyHealth health = enemy.GetComponent<EnemyHealth>();
-        if (health != null)
-        {
-            health.SetRoom(myRoom);
-        }
+        if (health != null) health.SetRoom(myRoom);
 
-        // 🆕 ROOM'A HABER VER
         if (myRoom != null) myRoom.OnEnemySpawned();
     }
 
